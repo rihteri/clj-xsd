@@ -15,6 +15,9 @@
 (def string
   (xs "string"))
 
+(def integer
+  (xs "integer"))
+
 (def ncname
   (xs "NCName"))
 

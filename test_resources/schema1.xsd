@@ -6,9 +6,16 @@
 
   <xs:complexType name="topType">
     <xs:sequence>
-      <xs:element name="a" type="xs:string" minOccurs="0" maxOccurs="1" />
+      <xs:element name="a" type="subType" minOccurs="0" maxOccurs="1" />
       <xs:element name="b" type="xs:string" minOccurs="1" maxOccurs="1" />
       <xs:element name="c" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="subType">
+    <xs:sequence>
+      <xs:element name="ugh" minOccurs="1" maxOccurs="1" type="xs:string" />
+      <xs:element name="argh" minOccurs="1" maxOccurs="1" type="xs:integer" />
     </xs:sequence>
   </xs:complexType>
 </xs:schema>
