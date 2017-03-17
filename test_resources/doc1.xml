@@ -1,2 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ex:orderperson xmlns:ex="http://example.org/test-schema-1">jabadaba</ex:orderperson>
+<ex:top xmlns:ex="http://example.org/test-schema-1">
+  <ex:b>
+    asdf
+  </ex:b>
+  <ex:c>123</ex:c>
+  <ex:c>!!!</ex:c>
+</ex:top>

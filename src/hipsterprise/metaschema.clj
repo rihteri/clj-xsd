@@ -4,7 +4,7 @@
 
 (def sns
   "XML Schema namespace"
-  "http://www.w3.org/XMLSchema")
+  "http://www.w3.org/2001/XMLSchema")
 
 (defn xs
 "Make an NCName in the XMLSchema namespace"
@@ -24,8 +24,8 @@
 (def schemaschema
   "The schema of an XML Schema document"
   {::hs/elems {(xs "schema") {::hs/attrs {(xs "targetNamespace") {::hs/type uri}}
-                              ::hs/elems {(xs "schemaTop") {::hs/multi [0 :n]
-                                                            ::hs/type  (xs "element")}}}}
+                              ::hs/elems [{(xs "schemaTop") {::hs/multi [0 :n]
+                                                             ::hs/type  (xs "element")}}]}}
    ::hs/types {(xs "element") {::hs/attrs {(xs "name") {::hs/type ncname}
                                            (xs "type") {::hs/type ncname}}}}})
 

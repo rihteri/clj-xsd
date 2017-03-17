@@ -7,7 +7,7 @@
 
 (defn parse [opts schema doc]
   (let [element (xml/parse doc)]
-    (parser/parse opts schema doc)))
+    (parser/parse opts schema element)))
 
 (defn read-schema [schema]
   (parse metaschema/parse-opts
