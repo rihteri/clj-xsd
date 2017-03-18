@@ -4,7 +4,8 @@
             [clojure.string :as str]
             [hipsterprise.metaschema :as xs]
             [hipsterprise.parser.utils :as utils]
-            [hipsterprise.parser.default-parsers :as parsers]))
+            [hipsterprise.parser.default-parsers :as parsers]
+            [hipsterprise.parser.attrs :as attrs]))
 
 (declare parse-element)
 
@@ -41,13 +42,12 @@
               (when (-> elements empty? not)
                 (do-parse-next)))))))
 
-(defn parse-element [opts schema el-type el-type-def element]
-  (let [el-type-def        (or el-type-def (get-in schema [::hs/types el-type]))
-        [kind content-def] (get-in el-type-def [::hs/content])
+(defn do-parse-content [opts schema el-type el-type-def element]
+  (let [[kind content-def] (get-in el-type-def [::hs/content])
         custom-parser      (or (get-in opts [::parsers ::complex el-type])
                                (utils/make-element-parser
-                                (get-in opts [::parsers
-                                              ::simple
+                                (get-in opts [:hipsterprise.core/parsers
+                                              :hipsterprise.core/simple
                                               el-type])))]
     (if custom-parser
       (custom-parser element)
@@ -55,16 +55,25 @@
         (apply hash-map (parse-content kind opts schema content-def (:content element)))
         (parsers/parse-string (:content element))))))
 
+(defn parse-element [opts schema el-type el-type-def element]
+  (let [el-type-def (or el-type-def (get-in schema [::hs/types el-type]))
+        attrs-def   (::hs/attrs el-type-def)
+        attrs       (attrs/parse-attrs opts schema attrs-def element)
+        content     (do-parse-content opts schema el-type el-type-def element)]
+    (if attrs
+      (merge attrs content)
+      content)))
+
 (def default-opts
-  {::parsers {::simple {xs/integer parsers/parse-integer}}})
+  {:hipsterprise.core/parsers {:hipsterprise.core/simple {xs/integer parsers/parse-integer}}})
 
 (defn parse [opts schema element]
-  (let [opts    (merge default-opts opts)
+  (let [opts    (merge default-opts opts) ; TODO does this merge properly?
         curr-el (-> element :tag hx/extract-tag)
         el-type (get-in schema [::hs/elems curr-el ::hs/type])
         content (parse-element opts
                                schema
                                el-type
-                               nil
+                               nil ; TODO inline type
                                element)]
     {(utils/make-kw opts curr-el) content}))

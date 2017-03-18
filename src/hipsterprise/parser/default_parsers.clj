@@ -7,7 +7,6 @@
        (str/join)
        (str/trim)))
 
-(defn parse-integer [content]
-  (-> content
-      parse-string
+(defn parse-integer [value]
+  (-> value
       Integer/parseInt))
