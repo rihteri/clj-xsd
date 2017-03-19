@@ -22,7 +22,8 @@
 (def expected-schema
   {::hs/tns   ex-ns
    ::hs/elems {(ex "top") {::hs/type (ex "topType")}}
-   ::hs/types {(ex "topType") {::hs/attrs   {(ex "soma") {::hs/type xs/string}
+   ::hs/types {(ex "topType") {::hs/attrs   {(ex "soma") {::hs/type xs/string
+                                                          ::hs/form ::hs/qualified}
                                              (ex "numa") {::hs/type xs/integer}}
                                ::hs/content [::hs/sequence [{::hs/element (ex "a")
                                                              ::hs/multi   [0 1]

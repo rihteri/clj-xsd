@@ -6,9 +6,18 @@
       (str/replace #"%3A" ":")
       (str/replace #"%2F" "/")))
 
-(defn extract-tag [tag]
-  (when tag
-    {::name (name tag)
-     ::ns   (-> (namespace tag)
-                (str/replace #"^xmlns\." "")
-                parse-namespace)}))
+(defn extract-namespace [tag]
+  (let [namespace-encoded (namespace tag)]
+    (when namespace-encoded
+      (-> namespace-encoded
+          (str/replace #"^xmlns\." "")
+          parse-namespace))))
+
+(defn extract-tag
+  ([tag]
+   (extract-tag nil tag))
+  ([curr-ns tag]
+   (when tag
+     (let [actual-ns (or (extract-namespace tag) curr-ns)]
+       {::name (name tag)
+        ::ns   actual-ns}))))
