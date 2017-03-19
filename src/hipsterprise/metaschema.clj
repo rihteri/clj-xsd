@@ -26,12 +26,28 @@
 
 (def schemaschema
   "The schema of an XML Schema document"
-  {::hs/elems {(xs "schema") {::hs/attrs {(xs "targetNamespace") {::hs/type uri}}
-                              ::hs/elems [{(xs "schemaTop") {::hs/multi [0 :n]
-                                                             ::hs/type  (xs "element")}}]}}
-   ::hs/types {(xs "element") {::hs/attrs {(xs "name") {::hs/type ncname}
-                                           (xs "type") {::hs/type ncname}}}}})
+  {::hs/elems {(xs "schema") {::hs/type (xs "schema")}}
+   ::hs/types {(xs "schema")      {::hs/attrs   {(xs "targetNamespace") {::hs/type uri}}
+                                   ::hs/content [::hs/choice
+                                                 {::hs/multi [0 :n]
+                                                  ::hs/elems {(xs "element")
+                                                              {::hs/type (xs "element")}
+                                                              (xs "complexType")
+                                                              {::hs/type (xs "complexType")}}}]}
+               (xs "element")     {::hs/attrs {(xs "name")      {::hs/type ncname}
+                                               (xs "type")      {::hs/type ncname}
+                                               (xs "minOccurs") {::hs/type integer}
+                                               (xs "maxOccurs") {::hs/type string}}}
+               (xs "complexType") {::hs/attrs   {(xs "name") {::hs/type string}}
+                                   ::hs/content [::hs/sequence
+                                                 {::hs/vals [{::hs/element (xs "sequence")
+                                                              ::hs/type    (xs "sequence")
+                                                              ::hs/multi   [0 :n]}]}]}
+               (xs "sequence")    {::hs/content [::hs/choice
+                                                 {::hs/multi [0 :n]
+                                                  ::hs/elems {(xs "element")
+                                                              {::hs/type (xs "element")}}}]}}})
 
 (def parse-opts
 "Default parsing options for schema documents"
-  {})
+  {:hipsterprise.core/namespaces {sns 'hipsterprise.metaschema}})

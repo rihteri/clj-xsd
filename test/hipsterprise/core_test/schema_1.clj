@@ -25,46 +25,55 @@
    ::hs/types {(ex "topType") {::hs/attrs   {(ex "soma") {::hs/type xs/string
                                                           ::hs/form ::hs/qualified}
                                              (ex "numa") {::hs/type xs/integer}}
-                               ::hs/content [::hs/sequence [{::hs/element (ex "a")
-                                                             ::hs/multi   [0 1]
-                                                             ::hs/type    (ex "subType")}
-                                                            {::hs/element (ex "b")
-                                                             ::hs/multi   [1 1]
-                                                             ::hs/type    xs/string}
-                                                            {::hs/element (ex "c")
-                                                             ::hs/multi   [0 :n]
-                                                             ::hs/type    xs/string}]]}
-               (ex "subType") {::hs/content [::hs/sequence [{::hs/element (ex "ugh")
-                                                             ::hs/multi   [1 1]
-                                                             ::hs/type    xs/string}
-                                                            {::hs/element (ex "argh")
-                                                             ::hs/multi   [1 1]
-                                                             ::hs/type    xs/integer}]]}}})
+                               ::hs/content [::hs/sequence {::hs/vals [{::hs/element (ex "a")
+                                                                        ::hs/multi   [0 1]
+                                                                        ::hs/type    (ex "subType")}
+                                                                       {::hs/element (ex "b")
+                                                                        ::hs/multi   [1 1]
+                                                                        ::hs/type    xs/string}
+                                                                       {::hs/element (ex "c")
+                                                                        ::hs/multi   [0 :n]
+                                                                        ::hs/type    xs/string}]}]}
+               (ex "subType") {::hs/content [::hs/sequence {::hs/vals  [{::hs/element (ex "ugh")
+                                                                         ::hs/multi   [1 1]
+                                                                         ::hs/type    xs/string}
+                                                                        {::hs/element (ex "argh")
+                                                                         ::hs/multi   [1 1]
+                                                                         ::hs/type    xs/integer}]}]}}})
 (def opts
   {::hipsterprise/namespaces {ex-ns *ns*}})
 
 (t/deftest parsing-doc
-  (t/is (= {::top {::a    {::ugh  "jabada"
-                           ::argh 1}
-                   ::b    "asdf"
-                   ::c    ["123" "!!!"]
-                   ::soma "jau"
-                   ::numa 42}}
+  (t/is (= {::a    {::ugh  "jabada"
+                    ::argh 1}
+            ::b    "asdf"
+            ::c    ["123" "!!!"]
+            ::soma "jau"
+            ::numa 42}
            (with-open [file (io/input-stream data-1)]
-             (hipsterprise/parse opts
-                                 expected-schema
-                                 file)))))
+             (::top (hipsterprise/parse opts
+                                        expected-schema
+                                        file))))))
 
 #_(t/deftest reading-schema
   (t/is (= expected-schema
            (do-read-schema))))
 
-#_(t/deftest parsing-schema
-  (t/is (= {::xs/target-namespace ex-ns
-            ; TODO missing
-            }
+(t/deftest parsing-schema
+  (t/is (= {::xs/target-namespace     ex-ns
+            ::xs/element-form-default ::xs/qualified
+            ::xs/element              [{::xs/name "top"
+                                        ::xs/type "topType"}]
+            ::xs/complex-type         [{::xs/name    "topType"
+                                        ::xs/sequence {::xs/element [{::xs/name       "a"
+                                                                      ::xs/type       "subType"
+                                                                      ::xs/min-occurs 0
+                                                                      ::xs/max-occurs 1}
+                                                                     {;TODO etc
+                                                                      }]}}]}
            (with-open [sch (io/input-stream schema-1)]
-             (hipsterprise/parse metaschema/parse-opts
-                                 metaschema/schemaschema
-                                 sch)))))
+             (-> (hipsterprise/parse xs/parse-opts
+                                     xs/schemaschema
+                                     sch)
+                 ::xs/schema)))))
 

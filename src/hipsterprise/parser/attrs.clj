@@ -4,8 +4,7 @@
             [hipsterprise.schema :as hs]))
 
 (defn is-correctly-namespaced? [maybe-attr-def tag]
-  (let [form (::hs/form maybe-attr-def)
-        _ (println maybe-attr-def form (hx/extract-namespace tag))]
+  (let [form (::hs/form maybe-attr-def)]
     (or (and (not= ::hs/qualified form) (nil? (hx/extract-namespace tag)))
         (and (= ::hs/qualified form) (hx/extract-namespace tag)))))
 

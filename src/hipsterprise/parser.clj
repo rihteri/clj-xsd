@@ -10,37 +10,55 @@
 (declare parse-element)
 
 (defmulti parse-content (fn [kind opts schema content-def elements] kind))
+
+(defmethod parse-content ::hs/choice [kind opts schema content-def elements]
+  (let [el            (first elements)
+        el-name       (hx/extract-tag (:tag el))
+        el-def        (get-in content-def [::hs/elems el-name])
+        type-to-parse (::hs/type el-def)
+        kw            (utils/make-kw opts el-name)
+        parsed        (parse-element opts schema type-to-parse nil el)
+        my-result     {kw (if (or (utils/is-plural? content-def)
+                                  (utils/is-plural? el-def))
+                            [parsed]
+                            parsed)}
+        more-elems    (when (not (empty? (rest elements)))
+                        (parse-content ::hs/choice
+                                       opts
+                                       schema
+                                       content-def
+                                       (rest elements)))]
+    (if (empty? more-elems)
+      my-result
+      (merge-with concat my-result more-elems))))
+
 (defmethod parse-content ::hs/sequence [kind opts schema content-def elements]
   (when (not (empty? elements))
-    (let [elements         (filter (complement string?) elements)
-          cur-el-def       (-> content-def first)
+    (let [cur-el-def       (-> content-def ::hs/vals first)
           element-to-parse (::hs/element cur-el-def)
           type-to-parse    (::hs/type cur-el-def)
-          upper-bound      (-> cur-el-def
-                               ::hs/multi
-                               second)
           is-type?         (partial utils/element-is? element-to-parse)
           elements-of-type (take-while is-type? elements)
           do-parse-next    (partial parse-content
                                     kind
                                     opts
                                     schema
-                                    (rest content-def)
+                                    (assoc content-def ::hs/vals (rest (::hs/vals content-def)))
                                     (drop-while is-type? elements))
           result           (map (partial parse-element
                                          opts
                                          schema
                                          type-to-parse
                                          nil) elements-of-type)
-          result           (if (or (= :n upper-bound) (> 1 upper-bound))
+          result           (if (utils/is-plural? cur-el-def)
                              result
                              (first result))
           kw               (utils/make-kw opts element-to-parse)]
       (if (empty? elements-of-type)
         (do-parse-next)
-        (into [kw result]
-              (when (-> elements empty? not)
-                (do-parse-next)))))))
+        (merge {kw result}
+               (when (-> elements empty? not)
+                 (do-parse-next)))))))
 
 (defn do-parse-content [opts schema el-type el-type-def element]
   (let [[kind content-def] (get-in el-type-def [::hs/content])
@@ -48,11 +66,14 @@
                                (utils/make-element-parser
                                 (get-in opts [:hipsterprise.core/parsers
                                               :hipsterprise.core/simple
-                                              el-type])))]
+                                              el-type])))
+        elements           (->> element
+                                :content
+                                (filter (complement string?)))]
     (if custom-parser
       (custom-parser element)
       (if kind
-        (apply hash-map (parse-content kind opts schema content-def (:content element)))
+        (parse-content kind opts schema content-def elements)
         (parsers/parse-string (:content element))))))
 
 (defn parse-element [opts schema el-type el-type-def element]
@@ -65,7 +86,8 @@
       content)))
 
 (def default-opts
-  {:hipsterprise.core/parsers {:hipsterprise.core/simple {xs/integer parsers/parse-integer}}})
+  {:hipsterprise.core/parsers {:hipsterprise.core/simple {xs/integer parsers/parse-integer
+                                                          xs/ncname  parsers/parse-ncname}}})
 
 (defn parse [opts schema element]
   (let [opts    (merge default-opts opts) ; TODO does this merge properly?
