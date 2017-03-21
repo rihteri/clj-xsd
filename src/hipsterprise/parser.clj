@@ -5,7 +5,8 @@
             [hipsterprise.metaschema :as xs]
             [hipsterprise.parser.utils :as utils]
             [hipsterprise.parser.default-parsers :as parsers]
-            [hipsterprise.parser.attrs :as attrs]))
+            [hipsterprise.parser.attrs :as attrs]
+            [clojure.data.xml :as xml]))
 
 (declare parse-element)
 
@@ -33,7 +34,8 @@
       (merge-with concat my-result more-elems))))
 
 (defmethod parse-content ::hs/sequence [kind opts schema content-def elements]
-  (when (not (empty? elements))
+  (when (and (not (empty? elements))
+             (not (empty? (-> content-def ::hs/vals))))
     (let [cur-el-def       (-> content-def ::hs/vals first)
           element-to-parse (::hs/element cur-el-def)
           type-to-parse    (::hs/type cur-el-def)
@@ -71,13 +73,14 @@
                                 :content
                                 (filter (complement string?)))]
     (if custom-parser
-      (custom-parser element)
+      (custom-parser opts element)
       (if kind
         (parse-content kind opts schema content-def elements)
-        (parsers/parse-string (:content element))))))
+        (parsers/parse-string opts (:content element))))))
 
 (defn parse-element [opts schema el-type el-type-def element]
-  (let [el-type-def (or el-type-def (get-in schema [::hs/types el-type]))
+  (let [opts        (utils/update-ns opts element)
+        el-type-def (or el-type-def (get-in schema [::hs/types el-type]))
         attrs-def   (::hs/attrs el-type-def)
         attrs       (attrs/parse-attrs opts schema attrs-def element)
         content     (do-parse-content opts schema el-type el-type-def element)]
@@ -85,12 +88,21 @@
       (merge attrs content)
       content)))
 
-(def default-opts
-  {:hipsterprise.core/parsers {:hipsterprise.core/simple {xs/integer parsers/parse-integer
-                                                          xs/ncname  parsers/parse-ncname}}})
+(def default-simple-parsers
+  {xs/integer parsers/parse-integer
+   xs/qname  parsers/parse-qname})
+
+(def simple-parsers-path
+  [:hipsterprise.core/parsers :hipsterprise.core/simple])
 
 (defn parse [opts schema element]
-  (let [opts    (merge default-opts opts) ; TODO does this merge properly?
+  (let [namespaces (hx/extract-namespace-mappings element)
+        simple-parsers (get-in opts simple-parsers-path)
+        opts       (-> opts
+                       (assoc-in simple-parsers-path
+                                 (merge default-simple-parsers
+                                        simple-parsers))
+                       (assoc ::xml/nss namespaces))
         curr-el (-> element :tag hx/extract-tag)
         el-type (get-in schema [::hs/elems curr-el ::hs/type])
         content (parse-element opts

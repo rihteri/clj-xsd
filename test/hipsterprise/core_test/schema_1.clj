@@ -15,8 +15,11 @@
   {::hx/name name
    ::hx/ns   ex-ns})
 
+(defn do-read-schema-xml []
+  (io/input-stream schema-1))
+
 (defn do-read-schema []
-  (with-open [sch (io/input-stream schema-1)]
+  (with-open [sch (do-read-schema-xml)]
     (hipsterprise/read-schema sch)))
 
 (def expected-schema
@@ -59,21 +62,69 @@
   (t/is (= expected-schema
            (do-read-schema))))
 
+(def expected-parsed-schema
+  {::xs/target-namespace     ex-ns
+   ::xs/element-form-default ::xs/qualified
+   ::xs/element              [{::xs/name "top"
+                               ::xs/type (ex "topType")}]
+   ::xs/complex-type         [{::xs/name      "topType"
+                               ::xs/attribute [{::xs/name "soma"
+                                                ::xs/type xs/string
+                                                ::xs/form ::xs/qualified}
+                                               {::xs/name "numa"
+                                                ::xs/type xs/integer}]
+                               ::xs/sequence  [{::xs/element [{::xs/name       "a"
+                                                                ::xs/type       (ex "subType")
+                                                                ::xs/min-occurs 0
+                                                                ::xs/max-occurs 1}
+                                                               {::xs/name       "b"
+                                                                ::xs/type       xs/string
+                                                                ::xs/min-occurs 1
+                                                                ::xs/max-occurs 1}
+                                                               {::xs/name       "c"
+                                                                ::xs/type       xs/string
+                                                                ::xs/min-occurs 0
+                                                                ::xs/max-occurs :n}]}]}
+                              {::xs/name     "subType"
+                               ::xs/sequence [{::xs/element [{::xs/name       "ugh"
+                                                               ::xs/type       xs/string
+                                                               ::xs/min-occurs 1
+                                                               ::xs/max-occurs 1}
+                                                              {::xs/name       "argh"
+                                                               ::xs/type       xs/integer
+                                                               ::xs/min-occurs 1
+                                                               ::xs/max-occurs 1}]}]}]})
+
+(defn is-same? [key expected-parsed-schema parse-result]
+  (apply = (map key [expected-parsed-schema parse-result])))
+
+(defn get-sequence [val]
+  (->> val
+       ::xs/complex-type
+       (map ::xs/sequence)))
+
+(defn get-name [val]
+  (->> val
+       ::xs/complex-type
+       (map ::xs/name)))
+
+(defn get-attr [val]
+  (->> val
+       ::xs/complex-type
+       (map ::xs/attribute)))
+
 (t/deftest parsing-schema
-  (t/is (= {::xs/target-namespace     ex-ns
-            ::xs/element-form-default ::xs/qualified
-            ::xs/element              [{::xs/name "top"
-                                        ::xs/type "topType"}]
-            ::xs/complex-type         [{::xs/name    "topType"
-                                        ::xs/sequence {::xs/element [{::xs/name       "a"
-                                                                      ::xs/type       "subType"
-                                                                      ::xs/min-occurs 0
-                                                                      ::xs/max-occurs 1}
-                                                                     {;TODO etc
-                                                                      }]}}]}
-           (with-open [sch (io/input-stream schema-1)]
-             (-> (hipsterprise/parse xs/parse-opts
-                                     xs/schemaschema
-                                     sch)
-                 ::xs/schema)))))
+  (let [parse-result (with-open [sch (io/input-stream schema-1)]
+                       (-> (hipsterprise/parse xs/parse-opts
+                                               xs/schemaschema
+                                               sch)
+                           ::xs/schema))]
+    (t/is (is-same? ::xs/element expected-parsed-schema parse-result))
+    (t/is (is-same? ::xs/target-namespace expected-parsed-schema parse-result))
+    (t/is (is-same? get-sequence expected-parsed-schema parse-result))
+    (t/is (is-same? get-name expected-parsed-schema parse-result))
+    (t/is (is-same? get-attr expected-parsed-schema parse-result))
+    (t/is (is-same? ::xs/complex-type expected-parsed-schema parse-result))
+    (t/is (= expected-parsed-schema
+             parse-result))))
 

@@ -1,5 +1,6 @@
 (ns hipsterprise.xml
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [clojure.data.xml :as xml]))
 
 (defn parse-namespace [encoded-ns]
   (-> encoded-ns
@@ -21,3 +22,8 @@
      (let [actual-ns (or (extract-namespace tag) curr-ns)]
        {::name (name tag)
         ::ns   actual-ns}))))
+
+(defn extract-namespace-mappings [top-level-element]
+  (-> top-level-element
+      meta
+      ::xml/nss))

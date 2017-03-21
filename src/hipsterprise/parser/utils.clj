@@ -1,16 +1,22 @@
 (ns hipsterprise.parser.utils
   (:require [hipsterprise.xml :as hx]
             [hipsterprise.parser.default-parsers :as parsers]
-            [hipsterprise.schema :as hs]))
+            [hipsterprise.schema :as hs]
+            [clojure.data.xml :as xml]
+            [camel-snake-kebab.core :as csk]))
 
 (defn make-kw [opts {ns ::hx/ns elname ::hx/name}]
-  (keyword (str (get-in opts [:hipsterprise.core/namespaces ns]))
-           elname))
+  (when (and ns elname)
+    (keyword (str (get-in opts [:hipsterprise.core/namespaces ns]))
+             (csk/->kebab-case elname))))
 
 (defn make-element-parser [simple-type-parser]
   (when simple-type-parser
-    (fn [element]
-      (-> element :content parsers/parse-string simple-type-parser))))
+    (fn [opts element]
+      (->> element
+           :content
+           (parsers/parse-string opts)
+           (simple-type-parser opts)))))
 
 (defn element-is? [type {:keys [tag] :as todo}]
    (= (hx/extract-tag tag)
@@ -23,3 +29,8 @@
     (and upper-bound
          (or (= :n upper-bound) (> 1 upper-bound)))))
 
+(defn update-ns [opts element]
+  (let [curr-ns (-> element :tag hx/extract-namespace)]
+    (if curr-ns
+      (assoc opts :hipsterprise.parser/curr-ns curr-ns)
+      opts)))
