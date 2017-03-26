@@ -1,7 +1,7 @@
 (ns hipsterprise.metaschema
-  (:require [hipsterprise.schema :as hs]
-            [hipsterprise.xml :as hx]
-            [hipsterprise.parser.default-parsers :as parsers]))
+  (:require [hipsterprise.xml :as hx]
+            [hipsterprise.parser.default-parsers :as parsers]
+            [hipsterprise.schema :as hs]))
 
 (def sns
   "XML Schema namespace"

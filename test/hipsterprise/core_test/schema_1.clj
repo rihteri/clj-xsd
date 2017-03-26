@@ -5,7 +5,8 @@
             [hipsterprise.schema :as hs]
             [hipsterprise.core :as hipsterprise]
             [hipsterprise.metaschema :as xs]
-            [clojure.data.xml :as xml]))
+            [clojure.data.xml :as xml]
+            [com.rpl.specter :as sc]))
 
 (def schema-1 "test_resources/schema1.xsd")
 (def data-1 "test_resources/doc1.xml")
@@ -23,26 +24,27 @@
     (hipsterprise/read-schema sch)))
 
 (def expected-schema
-  {::hs/tns   ex-ns
-   ::hs/elems {(ex "top") {::hs/type (ex "topType")}}
-   ::hs/types {(ex "topType") {::hs/attrs   {(ex "soma") {::hs/type xs/string
-                                                          ::hs/form ::hs/qualified}
-                                             (ex "numa") {::hs/type xs/integer}}
-                               ::hs/content [::hs/sequence {::hs/vals [{::hs/element (ex "a")
-                                                                        ::hs/multi   [0 1]
-                                                                        ::hs/type    (ex "subType")}
-                                                                       {::hs/element (ex "b")
-                                                                        ::hs/multi   [1 1]
-                                                                        ::hs/type    xs/string}
-                                                                       {::hs/element (ex "c")
-                                                                        ::hs/multi   [0 :n]
-                                                                        ::hs/type    xs/string}]}]}
-               (ex "subType") {::hs/content [::hs/sequence {::hs/vals  [{::hs/element (ex "ugh")
-                                                                         ::hs/multi   [1 1]
-                                                                         ::hs/type    xs/string}
-                                                                        {::hs/element (ex "argh")
-                                                                         ::hs/multi   [1 1]
-                                                                         ::hs/type    xs/integer}]}]}}})
+  {::hs/tns        ex-ns
+   ::hs/el-default ::hs/qualified
+   ::hs/elems      {(ex "top") {::hs/type (ex "topType")}}
+   ::hs/types      {(ex "topType") {::hs/attrs   {(ex "soma") {::hs/type xs/string
+                                                               ::hs/form ::hs/qualified}
+                                                  (ex "numa") {::hs/type xs/integer}}
+                                    ::hs/content [::hs/sequence {::hs/vals [{::hs/element (ex "a")
+                                                                             ::hs/multi   [0 1]
+                                                                             ::hs/type    (ex "subType")}
+                                                                            {::hs/element (ex "b")
+                                                                             ::hs/multi   [1 1]
+                                                                             ::hs/type    xs/string}
+                                                                            {::hs/element (ex "c")
+                                                                             ::hs/multi   [0 :n]
+                                                                             ::hs/type    xs/string}]}]}
+                    (ex "subType") {::hs/content [::hs/sequence {::hs/vals [{::hs/element (ex "ugh")
+                                                                             ::hs/multi   [1 1]
+                                                                             ::hs/type    xs/string}
+                                                                            {::hs/element (ex "argh")
+                                                                             ::hs/multi   [1 1]
+                                                                             ::hs/type    xs/integer}]}]}}})
 (def opts
   {::hipsterprise/namespaces {ex-ns *ns*}})
 
@@ -58,9 +60,23 @@
                                         expected-schema
                                         file))))))
 
-#_(t/deftest reading-schema
-  (t/is (= expected-schema
-           (do-read-schema))))
+(defn unord= [vals]
+  (apply = (map #(apply hash-set %) vals)))
+
+(defn extract [path vals]
+  (map #(sc/select path %) vals))
+
+(t/deftest reading-schema
+  (let [exp expected-schema
+        act (do-read-schema)
+        both [exp act]]
+    (t/is (unord= (map keys both)))
+    (t/is (unord= (extract [::hs/types sc/MAP-KEYS] both)))
+    (t/is (unord= (extract [::hs/types sc/MAP-VALS sc/MAP-KEYS] both)))
+    (t/is (unord= (extract [::hs/types sc/MAP-VALS ::hs/attrs sc/MAP-KEYS] both)))
+    (t/is (unord= (extract [::hs/types sc/MAP-VALS ::hs/attrs sc/MAP-VALS] both)))
+    (t/is (unord= (extract [::hs/types sc/MAP-VALS ::hs/content] both)))
+    (t/is (= exp act))))
 
 (def expected-parsed-schema
   {::xs/target-namespace     ex-ns

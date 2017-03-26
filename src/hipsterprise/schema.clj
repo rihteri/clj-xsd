@@ -1,3 +1,5 @@
 (ns hipsterprise.schema
-  (:require [hipsterprise.xml :as hx]))
+  (:require [hipsterprise.xml :as hx]
+            [clojure.set :as set]))
+
 

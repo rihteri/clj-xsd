@@ -2,7 +2,7 @@
   (:require [clojure.data.xml :as xml]
             [hipsterprise.metaschema :as metaschema]
             [hipsterprise.xml :as hx]
-            [hipsterprise.schema :as hs]
+            [hipsterprise.schema-parser :as sp]
             [hipsterprise.parser :as parser]))
 
 (defn parse [opts schema doc]
@@ -10,6 +10,7 @@
     (parser/parse opts schema element)))
 
 (defn read-schema [schema]
-  (parse metaschema/parse-opts
-         metaschema/schemaschema
-         schema))
+  (->> schema
+       (parse metaschema/parse-opts
+              metaschema/schemaschema)
+       sp/schema-to-internal))
