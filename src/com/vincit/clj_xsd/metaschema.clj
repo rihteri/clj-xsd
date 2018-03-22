@@ -1,12 +1,11 @@
-(ns hipsterprise.metaschema
+(ns com.vincit.clj-xsd.metaschema
   "
   The internal description of the XML Schema file
   "
-  (:require [hipsterprise.xml :as hx]
-            [hipsterprise.parser.default-parsers :as parsers]
-            [hipsterprise.schema :as hs]
-            [clojure.spec.alpha :as s]
-            [hipsterprise.parser.spec :as ps]))
+  (:require [com.vincit.clj-xsd.xml :as hx]
+            [com.vincit.clj-xsd.parser.default-parsers :as parsers]
+            [com.vincit.clj-xsd.schema :as hs]
+            [clojure.spec.alpha :as s]))
 
 (def sns
   "XML Schema namespace"
@@ -90,9 +89,9 @@
 
 (def parse-opts
 "Default parsing options for schema documents"
-  {:hipsterprise.core/namespaces {sns 'hipsterprise.metaschema}
-   :hipsterprise.core/parsers
-   {:hipsterprise.core/simple
+  {:com.vincit.clj-xsd.core/namespaces {sns 'com.vincit.clj-xsd.metaschema}
+   :com.vincit.clj-xsd.core/parsers
+   {:com.vincit.clj-xsd.core/simple
     {(xs "allNNI")     parse-all-nni
      (xs "formChoice") parse-form-choice
      ::use-type        parse-use-attr}}})

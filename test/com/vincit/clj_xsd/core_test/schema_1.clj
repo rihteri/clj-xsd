@@ -1,18 +1,18 @@
-(ns hipsterprise.core-test.schema-1
+(ns com.vincit.clj-xsd.core-test.schema-1
   (:require [clojure.test :as t]
-            [hipsterprise.xml :as hx]
+            [com.vincit.clj-xsd.xml :as hx]
             [clojure.java.io :as io]
-            [hipsterprise.schema :as hs]
-            [hipsterprise.core :as hipsterprise]
-            [hipsterprise.metaschema :as xs]
+            [com.vincit.clj-xsd.schema :as hs]
+            [com.vincit.clj-xsd.core :as hipsterprise]
+            [com.vincit.clj-xsd.metaschema :as xs]
             [clojure.data.xml :as xml]
             [com.rpl.specter :as sc]
             [clojure.pprint :as pp]
             [clojure.spec.alpha :as s]
             [clojure.spec.test.alpha :as st]))
 
-(st/instrument ['hipsterprise.core/parse
-                'hipsterprise.core/read-schema])
+(st/instrument ['com.vincit.clj-xsd.core/parse
+                'com.vincit.clj-xsd.core/read-schema])
 
 (def schema-1 "test_resources/schema1.xsd")
 (def data-1 "test_resources/doc1.xml")

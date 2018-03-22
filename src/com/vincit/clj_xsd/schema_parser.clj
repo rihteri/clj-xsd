@@ -1,12 +1,12 @@
-(ns hipsterprise.schema-parser
+(ns com.vincit.clj-xsd.schema-parser
   "
   For transforming a parsed schema definition into an internal format
   that is easier to work with.
   "
-  (:require [hipsterprise.metaschema :as xs]
+  (:require [com.vincit.clj-xsd.metaschema :as xs]
             [clojure.set :as set]
-            [hipsterprise.schema :as hs]
-            [hipsterprise.xml :as hx]
+            [com.vincit.clj-xsd.schema :as hs]
+            [com.vincit.clj-xsd.xml :as hx]
             [com.rpl.specter :as sc]))
 
 (defn make-qname [ns name]
@@ -74,7 +74,11 @@
       (assoc ::hs/elems (->> (group-types tns element)
                              (sc/transform [sc/MAP-VALS] rename-xs)))))
 
-(defn schema-to-internal [{parsed ::xs/schema}]
+(defn schema-to-internal
+  "
+  Turns a parsed schema document into a more
+  consice internal representation"
+  [{parsed ::xs/schema}]
   (let [tns               (::xs/target-namespace parsed)
         complex           (fix-types tns ::xs/complex-type parsed)
         simple            (fix-types tns ::xs/simple-type parsed)]

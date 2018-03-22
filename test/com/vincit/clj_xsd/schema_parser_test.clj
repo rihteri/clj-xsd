@@ -1,8 +1,8 @@
-(ns hipsterprise.schema-parser-test
-  (:require [hipsterprise.schema-parser :as sut]
+(ns com.vincit.clj-xsd.schema-parser-test
+  (:require [com.vincit.clj-xsd.schema-parser :as sut]
             [clojure.test :as t]
-            [hipsterprise.metaschema :as xs]
-            [hipsterprise.schema :as hs]))
+            [com.vincit.clj-xsd.metaschema :as xs]
+            [com.vincit.clj-xsd.schema :as hs]))
 
 (def tns "http://example.org/test-schema-1")
 

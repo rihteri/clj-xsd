@@ -1,5 +1,5 @@
-(defproject hipsterprise "0.1.0-SNAPSHOT"
-  :description "Easy XML handling for you favourite hipster language!"
+(defproject com.vincit/clj-xsd "0.1.0-SNAPSHOT"
+  :description "Easy XML handling for you favourite language!"
   :url ""
   :license {:name "Eclipse Public License"
             :url  "http://www.eclipse.org/legal/epl-v10.html"}

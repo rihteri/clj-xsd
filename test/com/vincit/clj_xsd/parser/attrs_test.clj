@@ -1,14 +1,14 @@
-(ns hipsterprise.parser.attrs-test
-  (:require [hipsterprise.parser.attrs :as sut]
+(ns com.vincit.clj-xsd.parser.attrs-test
+  (:require [com.vincit.clj-xsd.parser.attrs :as sut]
             [clojure.test :as t]
-            [hipsterprise.schema :as hs]
-            [hipsterprise.xml :as hx]
-            [hipsterprise.metaschema :as xs]
+            [com.vincit.clj-xsd.schema :as hs]
+            [com.vincit.clj-xsd.xml :as hx]
+            [com.vincit.clj-xsd.metaschema :as xs]
             [clojure.spec.test.alpha :as st]
             [clojure.data.xml :as xml]
-            [hipsterprise.metaschema :as metaschema]))
+            [com.vincit.clj-xsd.metaschema :as metaschema]))
 
-(st/instrument (st/enumerate-namespace 'hipsterprise.parser.attrs))
+(st/instrument (st/enumerate-namespace 'com.vincit.clj-xsd.parser.attrs))
 
 (def tns "some-ns")
 
@@ -38,7 +38,7 @@
   "<n:top xmlns:n=\"some-ns\" n:ana=\"another attr\" />")
 
 (def parse-opts
-  {:hipsterprise.core/namespaces {tns *ns*}})
+  {:com.vincit.clj-xsd.core/namespaces {tns *ns*}})
 
 (t/deftest parse-attrs-optionals
   (let [expected {::soma "ugh"         ; default

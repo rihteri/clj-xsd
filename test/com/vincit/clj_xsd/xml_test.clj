@@ -1,7 +1,7 @@
-(ns hipsterprise.xml-test
-  (:require [hipsterprise.xml :as hx]
+(ns com.vincit.clj-xsd.xml-test
+  (:require [com.vincit.clj-xsd.xml :as hx]
             [clojure.test :as t]
-            [hipsterprise.metaschema :as xs]))
+            [com.vincit.clj-xsd.metaschema :as xs]))
 
 (t/deftest tag-extraction
   (t/is (= [xs/sns "schema"]

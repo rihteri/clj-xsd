@@ -1,6 +1,6 @@
-(ns hipsterprise.parser.default-parsers
+(ns com.vincit.clj-xsd.parser.default-parsers
   (:require [clojure.string :as str]
-            [hipsterprise.xml :as hx]
+            [com.vincit.clj-xsd.xml :as hx]
             [clojure.data.xml :as xml]))
 
 (defn parse-string [opts content]

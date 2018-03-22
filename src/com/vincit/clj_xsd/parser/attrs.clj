@@ -1,7 +1,7 @@
-(ns hipsterprise.parser.attrs
-  (:require [hipsterprise.xml :as hx]
-            [hipsterprise.parser.utils :as utils]
-            [hipsterprise.schema :as hs]
+(ns com.vincit.clj-xsd.parser.attrs
+  (:require [com.vincit.clj-xsd.xml :as hx]
+            [com.vincit.clj-xsd.parser.utils :as utils]
+            [com.vincit.clj-xsd.schema :as hs]
             [com.rpl.specter :as sc]
             [clojure.pprint :as pp]
             [clojure.spec.alpha :as s]))
@@ -12,11 +12,11 @@
         (and (= ::hs/qualified form) (hx/extract-namespace tag)))))
 
 (defn parse-attr [opts schema attrs-def [tag val]]
-  (let [curr-ns   (:hipsterprise.parser/curr-ns opts)
+  (let [curr-ns   (:com.vincit.clj-xsd.parser/curr-ns opts)
         attr-name (hx/extract-tag curr-ns tag)
         attr-def  (get attrs-def attr-name)
         type      (::hs/type attr-def)
-        parser    (or (get-in opts [:hipsterprise.core/parsers :hipsterprise.core/simple type])
+        parser    (or (get-in opts [:com.vincit.clj-xsd.core/parsers :com.vincit.clj-xsd.core/simple type])
                       (fn [_ val] val))]
     (when (is-correctly-namespaced? attr-def tag)
       [(->> attr-name

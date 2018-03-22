@@ -1,13 +1,13 @@
-(ns hipsterprise.parser.utils
-  (:require [hipsterprise.xml :as hx]
-            [hipsterprise.parser.default-parsers :as parsers]
-            [hipsterprise.schema :as hs]
+(ns com.vincit.clj-xsd.parser.utils
+  (:require [com.vincit.clj-xsd.xml :as hx]
+            [com.vincit.clj-xsd.parser.default-parsers :as parsers]
+            [com.vincit.clj-xsd.schema :as hs]
             [clojure.data.xml :as xml]
             [camel-snake-kebab.core :as csk]))
 
 (defn make-kw [opts [ns elname]]
   (when elname
-    (keyword (some-> (get-in opts [:hipsterprise.core/namespaces ns])
+    (keyword (some-> (get-in opts [:com.vincit.clj-xsd.core/namespaces ns])
                      str)
              (csk/->kebab-case elname))))
 
@@ -33,5 +33,5 @@
 (defn update-ns [opts element]
   (let [curr-ns (-> element :tag hx/extract-namespace)]
     (if curr-ns
-      (assoc opts :hipsterprise.parser/curr-ns curr-ns)
+      (assoc opts :com.vincit.clj-xsd.parser/curr-ns curr-ns)
       opts)))

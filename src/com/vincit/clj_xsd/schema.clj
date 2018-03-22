@@ -1,6 +1,6 @@
-(ns hipsterprise.schema
+(ns com.vincit.clj-xsd.schema
   "spec for the parsed output"
-  (:require [hipsterprise.xml :as hx]
+  (:require [com.vincit.clj-xsd.xml :as hx]
             [clojure.set :as set]
             [clojure.spec.alpha :as s]))
 

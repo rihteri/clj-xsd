@@ -1,4 +1,4 @@
-(ns hipsterprise.xml
+(ns com.vincit.clj-xsd.xml
   (:require [clojure.string :as str]
             [clojure.data.xml :as xml]))
 

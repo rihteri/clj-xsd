@@ -1,11 +1,11 @@
-(ns hipsterprise.parser
-  (:require [hipsterprise.xml :as hx]
-            [hipsterprise.schema :as hs]
+(ns com.vincit.clj-xsd.parser
+  (:require [com.vincit.clj-xsd.xml :as hx]
+            [com.vincit.clj-xsd.schema :as hs]
             [clojure.string :as str]
-            [hipsterprise.metaschema :as xs]
-            [hipsterprise.parser.utils :as utils]
-            [hipsterprise.parser.default-parsers :as parsers]
-            [hipsterprise.parser.attrs :as attrs]
+            [com.vincit.clj-xsd.metaschema :as xs]
+            [com.vincit.clj-xsd.parser.utils :as utils]
+            [com.vincit.clj-xsd.parser.default-parsers :as parsers]
+            [com.vincit.clj-xsd.parser.attrs :as attrs]
             [clojure.data.xml :as xml]))
 
 (declare parse-element)
@@ -66,8 +66,8 @@
   (let [[kind content-def] (get-in el-type-def [::hs/content])
         custom-parser      (or (get-in opts [::parsers ::complex el-type])
                                (utils/make-element-parser
-                                (get-in opts [:hipsterprise.core/parsers
-                                              :hipsterprise.core/simple
+                                (get-in opts [:com.vincit.clj-xsd.core/parsers
+                                              :com.vincit.clj-xsd.core/simple
                                               el-type])))
         elements           (->> element
                                 :content
@@ -93,7 +93,7 @@
    xs/qname   parsers/parse-qname})
 
 (def simple-parsers-path
-  [:hipsterprise.core/parsers :hipsterprise.core/simple])
+  [:com.vincit.clj-xsd.core/parsers :com.vincit.clj-xsd.core/simple])
 
 (defn parse [opts schema element]
   (let [namespaces (hx/extract-namespace-mappings element)
