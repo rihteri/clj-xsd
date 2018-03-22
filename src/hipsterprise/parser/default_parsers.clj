@@ -20,5 +20,4 @@
         namesp (if had-ns
                  (get-in opts [::xml/nss (first res)])
                  (get-in opts [::xml/nss :xmlns]))]
-    {::hx/name name
-     ::hx/ns   namesp}))
+    [namesp name]))

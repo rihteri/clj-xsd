@@ -1,17 +1,25 @@
 (ns hipsterprise.metaschema
+  "
+  The internal description of the XML Schema file
+  "
   (:require [hipsterprise.xml :as hx]
             [hipsterprise.parser.default-parsers :as parsers]
-            [hipsterprise.schema :as hs]))
+            [hipsterprise.schema :as hs]
+            [clojure.spec.alpha :as s]
+            [hipsterprise.parser.spec :as ps]))
 
 (def sns
   "XML Schema namespace"
   "http://www.w3.org/2001/XMLSchema")
 
+(s/fdef xs
+        :args (s/cat :name ::hs/name)
+        :ret ::hs/qname)
+
 (defn xs
 "Make an NCName in the XMLSchema namespace"
   [name]
-  {::hx/name name
-   ::hx/ns   sns})
+  [sns name])
 
 (def string
   (xs "string"))
@@ -31,8 +39,11 @@
 (def schemaschema
   "The schema of an XML Schema document"
   {::hs/elems {(xs "schema") {::hs/type (xs "schema")}}
-   ::hs/types {(xs "schema")      {::hs/attrs   {(xs "targetNamespace")    {::hs/type uri}
-                                                 (xs "elementFormDefault") {::hs/type (xs "formChoice")}}
+   ::hs/types {(xs "schema")      {::hs/attrs   {(xs "targetNamespace")      {::hs/type uri}
+                                                 (xs "elementFormDefault")   {::hs/type    (xs "formChoice")
+                                                                              ::hs/use     ::hs/optional}
+                                                 (xs "attributeFormDefault") {::hs/type    (xs "formChoice")
+                                                                              ::hs/use     ::hs/optional}}
                                    ::hs/content [::hs/choice
                                                  {::hs/multi [0 :n]
                                                   ::hs/elems {(xs "element")
@@ -55,9 +66,11 @@
                                                  {::hs/multi [0 :n]
                                                   ::hs/elems {(xs "element")
                                                               {::hs/type (xs "element")}}}]}
-               (xs "attribute")   {::hs/attrs {(xs "name") {::hs/type string}
-                                               (xs "type") {::hs/type qname}
-                                               (xs "form") {::hs/type (xs "formChoice")}}}}})
+               (xs "attribute")   {::hs/attrs {(xs "name")    {::hs/type string}
+                                               (xs "type")    {::hs/type qname}
+                                               (xs "form")    {::hs/type (xs "formChoice")}
+                                               (xs "default") {::hs/type string}
+                                               (xs "use")     {::hs/type    ::use-type}}}}})
 
 (defn parse-all-nni [opts value]
   (if (= value "unbounded")
@@ -66,8 +79,14 @@
 
 (defn parse-form-choice [opts value]
   (case value
-    "qualified" ::qualified
-    "unqualified" ::unqualified))
+    "qualified" ::hs/qualified
+    "unqualified" ::hs/unqualified))
+
+(defn parse-use-attr [opts value]
+  (case value
+    "optional"   ::hs/optional
+    "prohibited" ::hs/prohibited
+    "required"   ::hs/required))
 
 (def parse-opts
 "Default parsing options for schema documents"
@@ -75,4 +94,5 @@
    :hipsterprise.core/parsers
    {:hipsterprise.core/simple
     {(xs "allNNI")     parse-all-nni
-     (xs "formChoice") parse-form-choice}}})
+     (xs "formChoice") parse-form-choice
+     ::use-type        parse-use-attr}}})

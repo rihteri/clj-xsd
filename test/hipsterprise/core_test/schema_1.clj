@@ -6,15 +6,20 @@
             [hipsterprise.core :as hipsterprise]
             [hipsterprise.metaschema :as xs]
             [clojure.data.xml :as xml]
-            [com.rpl.specter :as sc]))
+            [com.rpl.specter :as sc]
+            [clojure.pprint :as pp]
+            [clojure.spec.alpha :as s]
+            [clojure.spec.test.alpha :as st]))
+
+(st/instrument ['hipsterprise.core/parse
+                'hipsterprise.core/read-schema])
 
 (def schema-1 "test_resources/schema1.xsd")
 (def data-1 "test_resources/doc1.xml")
 (def ex-ns "http://example.org/test-schema-1")
 
 (defn ex [name]
-  {::hx/name name
-   ::hx/ns   ex-ns})
+  [ex-ns name])
 
 (defn do-read-schema-xml []
   (io/input-stream schema-1))
@@ -48,17 +53,25 @@
 (def opts
   {::hipsterprise/namespaces {ex-ns *ns*}})
 
+(def expected-doc
+  {::a    {::ugh  "jabada"
+           ::argh 1}
+   ::b    "asdf"
+   ::c    ["123" "!!!"]
+   ::soma "jau"
+   ::numa 42})
+
 (t/deftest parsing-doc
-  (t/is (= {::a    {::ugh  "jabada"
-                    ::argh 1}
-            ::b    "asdf"
-            ::c    ["123" "!!!"]
-            ::soma "jau"
-            ::numa 42}
+  (t/is (= expected-doc
            (with-open [file (io/input-stream data-1)]
              (::top (hipsterprise/parse opts
                                         expected-schema
-                                        file))))))
+                                        file)))))
+  (t/is (= expected-doc
+           (with-open [file   (io/input-stream data-1)
+                       schema (io/input-stream schema-1)]
+             (let [schema-parsed (hipsterprise/read-schema schema)]
+               (::top (hipsterprise/parse opts schema-parsed file)))))))
 
 (defn unord= [vals]
   (apply = (map #(apply hash-set %) vals)))
@@ -74,19 +87,32 @@
     (t/is (unord= (extract [::hs/types sc/MAP-KEYS] both)))
     (t/is (unord= (extract [::hs/types sc/MAP-VALS sc/MAP-KEYS] both)))
     (t/is (unord= (extract [::hs/types sc/MAP-VALS ::hs/attrs sc/MAP-KEYS] both)))
-    (t/is (unord= (extract [::hs/types sc/MAP-VALS ::hs/attrs sc/MAP-VALS] both)))
-    (t/is (unord= (extract [::hs/types sc/MAP-VALS ::hs/content] both)))
+    (t/is (unord= (extract [::hs/types
+                            (sc/keypath (ex "topType"))
+                            ::hs/attrs
+                            (sc/keypath (ex "numa"))
+                            ::hs/form] both))
+          "Form qualification")
+    (let [[exp act] (extract [::hs/types sc/MAP-VALS ::hs/attrs sc/MAP-VALS] both)]
+      (t/is (= exp act)
+            "attributes"))
+    (let [[exp act] (extract [::hs/types sc/MAP-VALS ::hs/content sc/LAST ::hs/vals sc/FIRST] both)]
+      (t/is (= exp act)))
+    (let [[exp act] (extract [::hs/types sc/MAP-VALS ::hs/content] both)]
+      (t/is (= exp act)))
+    (let [[exp act] (extract [::hs/elems sc/MAP-VALS] both)]
+      (t/is (= exp act)))
     (t/is (= exp act))))
 
 (def expected-parsed-schema
   {::xs/target-namespace     ex-ns
-   ::xs/element-form-default ::xs/qualified
+   ::xs/element-form-default ::hs/qualified
    ::xs/element              [{::xs/name "top"
                                ::xs/type (ex "topType")}]
    ::xs/complex-type         [{::xs/name      "topType"
                                ::xs/attribute [{::xs/name "soma"
                                                 ::xs/type xs/string
-                                                ::xs/form ::xs/qualified}
+                                                ::xs/form ::hs/qualified}
                                                {::xs/name "numa"
                                                 ::xs/type xs/integer}]
                                ::xs/sequence  [{::xs/element [{::xs/name       "a"
@@ -110,6 +136,9 @@
                                                                ::xs/type       xs/integer
                                                                ::xs/min-occurs 1
                                                                ::xs/max-occurs 1}]}]}]})
+
+(t/deftest is-test-valid?
+  (t/is (s/valid? ::hs/schema expected-schema)))
 
 (defn is-same? [key expected-parsed-schema parse-result]
   (apply = (map key [expected-parsed-schema parse-result])))
@@ -139,7 +168,9 @@
     (t/is (is-same? ::xs/target-namespace expected-parsed-schema parse-result))
     (t/is (is-same? get-sequence expected-parsed-schema parse-result))
     (t/is (is-same? get-name expected-parsed-schema parse-result))
-    (t/is (is-same? get-attr expected-parsed-schema parse-result))
+    (let [attr-exp (get-attr expected-parsed-schema)
+          attr-res (get-attr parse-result)]
+      (t/is (= attr-exp attr-res)))
     (t/is (is-same? ::xs/complex-type expected-parsed-schema parse-result))
     (t/is (= expected-parsed-schema
              parse-result))))

@@ -5,9 +5,10 @@
             [clojure.data.xml :as xml]
             [camel-snake-kebab.core :as csk]))
 
-(defn make-kw [opts {ns ::hx/ns elname ::hx/name}]
-  (when (and ns elname)
-    (keyword (str (get-in opts [:hipsterprise.core/namespaces ns]))
+(defn make-kw [opts [ns elname]]
+  (when elname
+    (keyword (some-> (get-in opts [:hipsterprise.core/namespaces ns])
+                     str)
              (csk/->kebab-case elname))))
 
 (defn make-element-parser [simple-type-parser]

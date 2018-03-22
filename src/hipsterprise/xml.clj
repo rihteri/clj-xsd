@@ -20,8 +20,7 @@
   ([curr-ns tag]
    (when tag
      (let [actual-ns (or (extract-namespace tag) curr-ns)]
-       {::name (name tag)
-        ::ns   actual-ns}))))
+       [actual-ns (name tag)]))))
 
 (defn extract-namespace-mappings [top-level-element]
   (-> top-level-element

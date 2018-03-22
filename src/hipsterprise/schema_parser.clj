@@ -1,4 +1,8 @@
 (ns hipsterprise.schema-parser
+  "
+  For transforming a parsed schema definition into an internal format
+  that is easier to work with.
+  "
   (:require [hipsterprise.metaschema :as xs]
             [clojure.set :as set]
             [hipsterprise.schema :as hs]
@@ -6,41 +10,79 @@
             [com.rpl.specter :as sc]))
 
 (defn make-qname [ns name]
-  {::hx/name name
-   ::hx/ns   ns})
+  [ns name])
+
+(defn rename-xs [attr]
+  (-> attr
+      (set/rename-keys {::xs/type ::hs/type
+                        ::xs/form ::hs/form})))
+
+(defn group-types [tns types]
+  (->> types
+       (group-by ::xs/name)
+       (sc/transform [sc/MAP-KEYS] (partial make-qname tns))
+       (sc/transform [sc/MAP-VALS] (comp #(dissoc % ::xs/name)
+                                         first))))
 
 (defn fix-attrs [tns {attrs ::xs/attribute :as type}]
-  (->> (assoc type ::hs/attrs (group-by ::xs/name attrs))
-       (sc/transform [::hs/attrs sc/MAP-KEYS] (partial make-qname tns))))
+  (->> attrs
+       (group-types tns)
+       (sc/transform [sc/MAP-VALS] rename-xs)
+       (assoc type ::hs/attrs)))
+
+(defn fix-seq-el [tns {max-occurs ::xs/max-occurs
+                       min-occurs ::xs/min-occurs
+                       name       ::xs/name
+                       :as        el}]
+  (-> el
+      (set/rename-keys {::xs/type ::hs/type})
+      (dissoc ::xs/max-occurs ::xs/min-occurs ::xs/name ::xs/element)
+      (assoc ::hs/element [tns name])
+      (assoc ::hs/multi [min-occurs max-occurs])))
+
+(defn fix-seq [tns seq]
+  (let [vals (->> seq
+                  (map ::xs/element)
+                  first
+                  (map (partial fix-seq-el tns)))]
+    [::hs/sequence {::hs/vals vals}]))
 
 (defn fix-content [tns {seq    ::xs/sequence
                         choice ::xs/choice
                         :as    type}]
-  (assoc type ::hs/content [::hs/sequence seq]))
+                                        ; TODO choice not supported?
+  (-> type
+      (assoc ::hs/content (fix-seq tns seq))
+      (dissoc ::xs/sequence)))
 
 (defn fix-type [{attrs ::hs/attrs :as type}]
   (cond-> type
-    true           (dissoc ::xs/name ::xs/attribute ::xs/sequence)
+    true           (dissoc ::xs/attribute)
     (empty? attrs) (dissoc ::hs/attrs)))
 
-(defn group-types [tns kind parsed]
+(defn fix-types [tns kind parsed]
   (->> parsed
        kind
-       (group-by ::xs/name)
-       (sc/transform [sc/MAP-KEYS] (partial make-qname tns))
+       (group-types tns)
        (sc/transform [sc/MAP-VALS] (comp fix-type
                                          (partial fix-attrs tns)
-                                         (partial fix-content tns)
-                                         first))))
+                                         (partial fix-content tns)))))
+
+(defn fix-elems [{:keys [::xs/element] :as schema} tns]
+  (-> schema
+      (dissoc ::xs/element)
+      (assoc ::hs/elems (->> (group-types tns element)
+                             (sc/transform [sc/MAP-VALS] rename-xs)))))
 
 (defn schema-to-internal [{parsed ::xs/schema}]
-  (let [tns     (::xs/target-namespace parsed)
-        complex (group-types tns ::xs/complex-type parsed)
-        simple  (group-types tns ::xs/simple-type parsed)]
+  (let [tns               (::xs/target-namespace parsed)
+        complex           (fix-types tns ::xs/complex-type parsed)
+        simple            (fix-types tns ::xs/simple-type parsed)]
     (-> parsed
-        (set/rename-keys {::xs/target-namespace     ::hs/tns
-                          ::xs/element              ::hs/elems
-                          ::xs/element-form-default ::hs/el-default})
+        (set/rename-keys {::xs/target-namespace       ::hs/tns
+                          ::xs/element-form-default   ::hs/el-default
+                          ::xs/attribute-form-default ::hs/attr-default})
+        (fix-elems tns)
         (assoc ::hs/types (merge complex
                                  simple))
         (dissoc ::xs/complex-type ::xs/simple-type))))

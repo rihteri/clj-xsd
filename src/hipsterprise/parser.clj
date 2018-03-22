@@ -90,24 +90,22 @@
 
 (def default-simple-parsers
   {xs/integer parsers/parse-integer
-   xs/qname  parsers/parse-qname})
+   xs/qname   parsers/parse-qname})
 
 (def simple-parsers-path
   [:hipsterprise.core/parsers :hipsterprise.core/simple])
 
 (defn parse [opts schema element]
   (let [namespaces (hx/extract-namespace-mappings element)
-        simple-parsers (get-in opts simple-parsers-path)
         opts       (-> opts
-                       (assoc-in simple-parsers-path
-                                 (merge default-simple-parsers
-                                        simple-parsers))
+                       (update-in simple-parsers-path
+                                  #(merge default-simple-parsers %))
                        (assoc ::xml/nss namespaces))
-        curr-el (-> element :tag hx/extract-tag)
-        el-type (get-in schema [::hs/elems curr-el ::hs/type])
-        content (parse-element opts
-                               schema
-                               el-type
-                               nil ; TODO inline type
-                               element)]
+        curr-el    (-> element :tag hx/extract-tag)
+        el-type    (get-in schema [::hs/elems curr-el ::hs/type])
+        content    (parse-element opts
+                                  schema
+                                  el-type
+                                  nil ; TODO inline type
+                                  element)]
     {(utils/make-kw opts curr-el) content}))
