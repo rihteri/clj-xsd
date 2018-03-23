@@ -11,25 +11,33 @@
     (or (and (not= ::hs/qualified form) (nil? (hx/extract-namespace tag)))
         (and (= ::hs/qualified form) (hx/extract-namespace tag)))))
 
+(defn get-parser [opts type]
+  (let [parser (get-in opts [:com.vincit.clj-xsd.core/parsers :com.vincit.clj-xsd.core/simple type])]
+    (or (when parser (partial parser opts))
+        (fn [val] val))))
+
 (defn parse-attr [opts schema attrs-def [tag val]]
   (let [curr-ns   (:com.vincit.clj-xsd.parser/curr-ns opts)
         attr-name (hx/extract-tag curr-ns tag)
         attr-def  (get attrs-def attr-name)
         type      (::hs/type attr-def)
-        parser    (or (get-in opts [:com.vincit.clj-xsd.core/parsers :com.vincit.clj-xsd.core/simple type])
-                      (fn [_ val] val))]
+        parser    (get-parser opts type)]
     (when (is-correctly-namespaced? attr-def tag)
       [(->> attr-name
             (utils/make-kw opts))
-       (parser opts val)])))
+       (parser val)])))
 
 (defn has-default? [[_ attr-def]]
   (contains? attr-def ::hs/default))
 
+(defn parse-default [opts {:keys [::hs/default ::hs/type]}]
+  (let [parser (get-parser opts type)]
+    (parser default)))
+
 (defn get-defaults [opts attrs-def]
   (->> (filter has-default? attrs-def)
        (sc/transform [sc/ALL sc/FIRST] (partial utils/make-kw opts))
-       (sc/transform [sc/ALL sc/LAST] ::hs/default)
+       (sc/transform [sc/ALL sc/LAST] (partial parse-default opts))
        (into {})))
 
 (s/fdef parse-attrs
