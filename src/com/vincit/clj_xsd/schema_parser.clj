@@ -30,7 +30,7 @@
        (sc/transform [sc/MAP-VALS] rename-xs)
        (assoc type ::hs/attrs)))
 
-(defn fix-seq-el [tns {max-occurs ::xs/max-occurs
+(defn fix-one-seq-el [tns {max-occurs ::xs/max-occurs
                        min-occurs ::xs/min-occurs
                        name       ::xs/name
                        :as        el}]
@@ -40,20 +40,35 @@
       (assoc ::hs/element [tns name])
       (assoc ::hs/multi [min-occurs max-occurs])))
 
-(defn fix-seq [tns seq]
-  (let [vals (->> seq
-                  (map ::xs/element)
-                  first
-                  (map (partial fix-seq-el tns)))]
+(defn fix-seq-el [tns seq]
+  (->> seq
+       (map ::xs/element)
+       first
+       (map (partial fix-one-seq-el tns))))
+
+(defmulti fix-sub-el-clause (fn [_ [type _]] type) )
+
+(defmethod fix-sub-el-clause ::xs/sequence [tns [type seq]]
+  (let [vals (fix-seq-el tns seq)]
     [::hs/sequence {::hs/vals vals}]))
 
-(defn fix-content [tns {seq    ::xs/sequence
-                        choice ::xs/choice
-                        :as    type}]
-                                        ; TODO choice not supported?
+(defmethod fix-sub-el-clause ::xs/choice [tns [type seq]]
+  (let [vals (fix-seq-el tns seq)]
+    [::hs/choice {::hs/elems (->> vals
+                                  (group-by ::hs/element)
+                                  (sc/transform [sc/MAP-VALS] (comp #(dissoc % ::hs/element)
+                                                                    first)))}]))
+
+(defn make-content-clause [tns type]
+  (->> (select-keys type [::xs/choice ::xs/sequence])
+       (map (partial fix-sub-el-clause tns))
+       (filter some?)
+       first))
+
+(defn fix-content [tns type]
   (-> type
-      (assoc ::hs/content (fix-seq tns seq))
-      (dissoc ::xs/sequence)))
+      (assoc ::hs/content (make-content-clause tns type))
+      (dissoc ::xs/sequence ::xs/choice)))
 
 (defn fix-type [{attrs ::hs/attrs :as type}]
   (cond-> type

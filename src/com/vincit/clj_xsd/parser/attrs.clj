@@ -12,7 +12,7 @@
         (and (= ::hs/qualified form) (hx/extract-namespace tag)))))
 
 (defn get-parser [opts type]
-  (let [parser (get-in opts [:com.vincit.clj-xsd.core/parsers :com.vincit.clj-xsd.core/simple type])]
+  (let [parser (utils/get-parser opts type utils/simple-parsers-path)]
     (or (when parser (partial parser opts))
         (fn [val] val))))
 

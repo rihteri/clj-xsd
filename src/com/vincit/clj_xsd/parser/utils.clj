@@ -5,6 +5,17 @@
             [clojure.data.xml :as xml]
             [camel-snake-kebab.core :as csk]))
 
+(def parsers-key :com.vincit.clj-xsd.core/parsers)
+(def simple-parsers-path
+  [parsers-key :com.vincit.clj-xsd.core/simple])
+(def complex-parsers-path
+  [parsers-key :com.vincit.clj-xsd.core/complex])
+
+(defn get-parser [opts type path]
+  (-> opts
+      (get-in path)
+      (get type)))
+
 (defn make-kw [opts [ns elname]]
   (when elname
     (keyword (some-> (get-in opts [:com.vincit.clj-xsd.core/namespaces ns])

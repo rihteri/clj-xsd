@@ -47,7 +47,7 @@ And a document like this:
         ex:soma="jau" numa="42">
   <ex:a>
     <ex:ugh>jabada</ex:ugh>
-    <ex:argh>1</ex:argh>p
+    <ex:argh>1</ex:argh>
   </ex:a>
   <ex:b>
     asdf

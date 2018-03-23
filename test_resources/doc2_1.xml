@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ex:top xmlns:ex="http://example.org/test-schema-2">
+  <ex:a>
+    <ex:ugh>jabada</ex:ugh>
+  </ex:a>
+</ex:top>

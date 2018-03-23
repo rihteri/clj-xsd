@@ -7,7 +7,8 @@
             [clojure.spec.test.alpha :as st]
             [clojure.data.xml :as xml]
             [com.vincit.clj-xsd.metaschema :as metaschema]
-            [com.vincit.clj-xsd.parser :as parser]))
+            [com.vincit.clj-xsd.parser :as parser]
+            [com.vincit.clj-xsd.parser.utils :as utils]))
 
 (st/instrument (st/enumerate-namespace 'com.vincit.clj-xsd.parser.attrs))
 
@@ -55,6 +56,6 @@
                                 ::hs/default "42"
                                 ::hs/form    ::hs/unqualified}}
         expected {:numa 42}
-        parse-opts (assoc-in {} parser/simple-parsers-path parser/default-simple-parsers)
+        parse-opts (assoc-in {} utils/simple-parsers-path parser/default-simple-parsers)
         parsed (sut/parse-attrs parse-opts (schema attr-def) attr-def xml-map)]
     (t/is (= expected parsed))))

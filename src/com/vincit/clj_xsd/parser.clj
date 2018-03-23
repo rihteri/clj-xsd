@@ -64,11 +64,10 @@
 
 (defn do-parse-content [opts schema el-type el-type-def element]
   (let [[kind content-def] (get-in el-type-def [::hs/content])
-        custom-parser      (or (get-in opts [::parsers ::complex el-type])
+        get-parser         (partial utils/get-parser opts el-type)
+        custom-parser      (or (get-parser utils/complex-parsers-path)
                                (utils/make-element-parser
-                                (get-in opts [:com.vincit.clj-xsd.core/parsers
-                                              :com.vincit.clj-xsd.core/simple
-                                              el-type])))
+                                (get-parser utils/simple-parsers-path)))
         elements           (->> element
                                 :content
                                 (filter (complement string?)))]
@@ -92,13 +91,10 @@
   {xs/integer parsers/parse-integer
    xs/qname   parsers/parse-qname})
 
-(def simple-parsers-path
-  [:com.vincit.clj-xsd.core/parsers :com.vincit.clj-xsd.core/simple])
-
 (defn parse [opts schema element]
   (let [namespaces (hx/extract-namespace-mappings element)
         opts       (-> opts
-                       (update-in simple-parsers-path
+                       (update-in utils/simple-parsers-path
                                   #(merge default-simple-parsers %))
                        (assoc ::xml/nss namespaces))
         curr-el    (-> element :tag hx/extract-tag)
