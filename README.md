@@ -81,7 +81,6 @@ You can get a nice clojure representation of the document like this:
 ## TODO
 Many things, but most useful might be
 * extension improvements (choice -> sequence, choice -> choice etc)
-* xsi:type
 * anonymous types
 * element refs
 * attribute refs

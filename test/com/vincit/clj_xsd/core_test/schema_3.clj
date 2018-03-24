@@ -13,6 +13,16 @@
                 :ugh  "asdf"
                 :b    "tsib dab"}}})
 
+(def expected-doc-2
+  {:top {:base {:soma "jau"
+                :numa 42
+                :b    "jabada"
+                :ugh  "extended!"}
+         :sub  {:soma "yippe"
+                :numa 123
+                :ugh  "asdf"
+                :b    "tsib dab"}}})
+
 (def tns "http://example.org/test-schema-3")
 
 (def expected-schema
@@ -51,3 +61,8 @@
   (with-open [file (io/input-stream "test_resources/doc3_1.xml")]
     (let [act (cxs/parse (get-schema) file)]
       (t/is (= expected-doc-1 act)))))
+
+(t/deftest xsi-type
+  (with-open [file (io/input-stream "test_resources/doc3_2.xml")]
+    (let [act (cxs/parse expected-schema file)]
+      (t/is (= expected-doc-2 act)))))

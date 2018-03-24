@@ -11,6 +11,10 @@
   "XML Schema namespace"
   "http://www.w3.org/2001/XMLSchema")
 
+(def xsi-ns
+  "XML Schema Instance namespace"
+  "http://www.w3.org/2001/XMLSchema-instance")
+
 (s/fdef xs
         :args (s/cat :name ::hs/name)
         :ret ::hs/qname)

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ex:top xmlns:ex="http://example.org/test-schema-3"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <ex:base soma="jau" xsi:type="ex:subType" numa="42">
+    <ex:b>jabada</ex:b>
+    <ex:ugh>extended!</ex:ugh>
+  </ex:base>
+  <ex:sub soma="yippe" numa="123">
+    <ex:b>tsib dab</ex:b>
+    <ex:ugh>asdf</ex:ugh>
+  </ex:sub>
+</ex:top>

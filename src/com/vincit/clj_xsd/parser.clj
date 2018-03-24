@@ -78,8 +78,16 @@
         (parse-content kind opts schema content-def elements)
         (parsers/parse-string opts (:content element))))))
 
+(def xsi-type-kw
+  :xmlns.http%3A%2F%2Fwww.w3.org%2F2001%2FXMLSchema-instance/type)
+
 (defn parse-element [opts schema el-type el-type-def element]
   (let [opts        (utils/update-ns opts element)
+        xsi-type    (some->> element
+                             :attrs
+                             xsi-type-kw
+                             (parsers/parse-qname opts))
+        el-type     (or xsi-type el-type)
         el-type-def (->> (or el-type-def (get-in schema [::hs/types el-type]))
                          (ep/unwrap-type schema))
         attrs-def   (::hs/attrs el-type-def)
