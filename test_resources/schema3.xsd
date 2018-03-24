@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:ex="http://example.org/test-schema-3"
+           xmlns="http://example.org/test-schema-3"
+           targetNamespace="http://example.org/test-schema-3"
+           elementFormDefault="qualified">
+  <xs:element name="top" type="ex:topType" />
+
+  <xs:complexType name="topType">
+    <xs:sequence>
+      <xs:element name="base" type="ex:baseType" />
+      <xs:element name="sub" type="ex:subType" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="baseType">
+    <xs:sequence>
+      <xs:element name="b" type="xs:string" minOccurs="1" maxOccurs="1" />
+    </xs:sequence>
+    <xs:attribute name="soma" type="xs:string" />
+  </xs:complexType>
+
+  <xs:complexType name="subType">
+    <xs:complexContent>
+      <xs:extension base="ex:baseType">
+        <xs:sequence>
+          <xs:element name="ugh" minOccurs="1" maxOccurs="1" type="xs:string" />
+        </xs:sequence>
+        <xs:attribute name="numa" type="xs:integer" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+</xs:schema>

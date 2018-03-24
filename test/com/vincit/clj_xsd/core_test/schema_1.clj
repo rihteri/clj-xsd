@@ -115,27 +115,27 @@
                                                 ::xs/form ::hs/qualified}
                                                {::xs/name "numa"
                                                 ::xs/type xs/integer}]
-                               ::xs/sequence  [{::xs/element [{::xs/name       "a"
-                                                                ::xs/type       (ex "subType")
-                                                                ::xs/min-occurs 0
-                                                                ::xs/max-occurs 1}
-                                                               {::xs/name       "b"
-                                                                ::xs/type       xs/string
-                                                                ::xs/min-occurs 1
-                                                                ::xs/max-occurs 1}
-                                                               {::xs/name       "c"
-                                                                ::xs/type       xs/string
-                                                                ::xs/min-occurs 0
-                                                                ::xs/max-occurs :n}]}]}
+                               ::xs/sequence  {::xs/element [{::xs/name       "a"
+                                                              ::xs/type       (ex "subType")
+                                                              ::xs/min-occurs 0
+                                                              ::xs/max-occurs 1}
+                                                             {::xs/name       "b"
+                                                              ::xs/type       xs/string
+                                                              ::xs/min-occurs 1
+                                                              ::xs/max-occurs 1}
+                                                             {::xs/name       "c"
+                                                              ::xs/type       xs/string
+                                                              ::xs/min-occurs 0
+                                                              ::xs/max-occurs :n}]}}
                               {::xs/name     "subType"
-                               ::xs/sequence [{::xs/element [{::xs/name       "ugh"
-                                                               ::xs/type       xs/string
-                                                               ::xs/min-occurs 1
-                                                               ::xs/max-occurs 1}
-                                                              {::xs/name       "argh"
-                                                               ::xs/type       xs/integer
-                                                               ::xs/min-occurs 1
-                                                               ::xs/max-occurs 1}]}]}]})
+                               ::xs/sequence {::xs/element [{::xs/name       "ugh"
+                                                             ::xs/type       xs/string
+                                                             ::xs/min-occurs 1
+                                                             ::xs/max-occurs 1}
+                                                            {::xs/name       "argh"
+                                                             ::xs/type       xs/integer
+                                                             ::xs/min-occurs 1
+                                                             ::xs/max-occurs 1}]}}]})
 
 (t/deftest is-test-valid?
   (t/is (s/valid? ::hs/schema expected-schema)))

@@ -78,6 +78,15 @@ You can get a nice clojure representation of the document like this:
            :c ("123" "!!!")}}
 ```
 
+## TODO
+Many things, but most useful might be
+* extension improvements (choice -> sequence, choice -> choice etc)
+* xsi:type
+* anonymous types
+* element refs
+* attribute refs
+* groups
+
 ## License
 
 Copyright © 2018 Vincit

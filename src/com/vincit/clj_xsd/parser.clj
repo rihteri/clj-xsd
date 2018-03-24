@@ -6,6 +6,7 @@
             [com.vincit.clj-xsd.parser.utils :as utils]
             [com.vincit.clj-xsd.parser.default-parsers :as parsers]
             [com.vincit.clj-xsd.parser.attrs :as attrs]
+            [com.vincit.clj-xsd.parser.extension :as ep]
             [clojure.data.xml :as xml]))
 
 (declare parse-element)
@@ -79,7 +80,8 @@
 
 (defn parse-element [opts schema el-type el-type-def element]
   (let [opts        (utils/update-ns opts element)
-        el-type-def (or el-type-def (get-in schema [::hs/types el-type]))
+        el-type-def (->> (or el-type-def (get-in schema [::hs/types el-type]))
+                         (ep/unwrap-type schema))
         attrs-def   (::hs/attrs el-type-def)
         attrs       (attrs/parse-attrs opts schema attrs-def element)
         content     (do-parse-content opts schema el-type el-type-def element)]

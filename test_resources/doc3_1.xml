@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ex:top xmlns:ex="http://example.org/test-schema-3">
+  <ex:base soma="jau">
+    <ex:b>jabada</ex:b>
+  </ex:base>
+  <ex:sub soma="yippe" numa="123">
+    <ex:b>tsib dab</ex:b>
+    <ex:ugh>asdf</ex:ugh>
+  </ex:sub>
+</ex:top>

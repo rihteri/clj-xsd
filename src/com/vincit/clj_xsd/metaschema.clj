@@ -38,45 +38,63 @@
 (def schemaschema
   "The schema of an XML Schema document"
   {::hs/elems {(xs "schema") {::hs/type (xs "schema")}}
-   ::hs/types {(xs "schema")      {::hs/attrs   {(xs "targetNamespace")      {::hs/type uri}
-                                                 (xs "elementFormDefault")   {::hs/type (xs "formChoice")
-                                                                              ::hs/use  ::hs/optional}
-                                                 (xs "attributeFormDefault") {::hs/type (xs "formChoice")
-                                                                              ::hs/use  ::hs/optional}}
-                                   ::hs/content [::hs/choice
-                                                 {::hs/multi [0 :n]
-                                                  ::hs/elems {(xs "element")
-                                                              {::hs/type (xs "element")}
-                                                              (xs "complexType")
-                                                              {::hs/type (xs "complexType")}}}]}
-               (xs "element")     {::hs/attrs {(xs "name")      {::hs/type ncname}
-                                               (xs "type")      {::hs/type qname}
-                                               (xs "minOccurs") {::hs/type integer}
-                                               (xs "maxOccurs") {::hs/type (xs "allNNI")}}}
-               (xs "complexType") {::hs/attrs   {(xs "name") {::hs/type ncname}}
-                                   ::hs/content [::hs/sequence
-                                                 {::hs/vals [{::hs/element (xs "sequence")
-                                                              ::hs/type    (xs "sequence")
-                                                              ::hs/multi   [0 :n]}
-                                                             {::hs/element (xs "choice")
-                                                              ::hs/type    (xs "choice")
-                                                              ::hs/multi   [0 :n]}
-                                                             {::hs/element (xs "attribute")
-                                                              ::hs/type    (xs "attribute")
-                                                              ::hs/multi   [0 :n]}]}]}
-               (xs "sequence")    {::hs/content [::hs/choice
-                                                 {::hs/multi [0 :n]
-                                                  ::hs/elems {(xs "element")
-                                                              {::hs/type (xs "element")}}}]}
-               (xs "choice")      {::hs/content [::hs/choice
-                                                 {::hs/multi [0 :n]
-                                                  ::hs/elems {(xs "element")
-                                                              {::hs/type (xs "element")}}}]}
-               (xs "attribute")   {::hs/attrs {(xs "name")    {::hs/type string}
-                                               (xs "type")    {::hs/type qname}
-                                               (xs "form")    {::hs/type (xs "formChoice")}
-                                               (xs "default") {::hs/type string}
-                                               (xs "use")     {::hs/type ::use-type}}}}})
+   ::hs/types {(xs "schema")         {::hs/attrs   {(xs "targetNamespace")      {::hs/type uri}
+                                                    (xs "elementFormDefault")   {::hs/type (xs "formChoice")
+                                                                                 ::hs/use  ::hs/optional}
+                                                    (xs "attributeFormDefault") {::hs/type (xs "formChoice")
+                                                                                 ::hs/use  ::hs/optional}}
+                                      ::hs/content [::hs/choice
+                                                    {::hs/multi [0 :n]
+                                                     ::hs/elems {(xs "element")
+                                                                 {::hs/type (xs "element")}
+                                                                 (xs "complexType")
+                                                                 {::hs/type (xs "complexType")}}}]}
+               (xs "element")        {::hs/attrs {(xs "name")      {::hs/type ncname}
+                                                  (xs "type")      {::hs/type qname}
+                                                  (xs "minOccurs") {::hs/type integer}
+                                                  (xs "maxOccurs") {::hs/type (xs "allNNI")}}}
+               (xs "complexType")    {::hs/attrs   {(xs "name") {::hs/type ncname}}
+                                      ::hs/content [::hs/sequence
+                                                    {::hs/vals [{::hs/element (xs "sequence")
+                                                                 ::hs/type    (xs "sequence")
+                                                                 ::hs/multi   [0 1]}
+                                                                {::hs/element (xs "complexContent")
+                                                                 ::hs/type    (xs "complexContent")
+                                                                 ::hs/multi   [0 1]}
+                                                                {::hs/element (xs "choice")
+                                                                 ::hs/type    (xs "choice")
+                                                                 ::hs/multi   [0 1]}
+                                                                {::hs/element (xs "attribute")
+                                                                 ::hs/type    (xs "attribute")
+                                                                 ::hs/multi   [0 :n]}]}]}
+               (xs "complexContent") {::hs/content [::hs/sequence
+                                                    {::hs/vals [{::hs/element (xs "extension")
+                                                                 ::hs/type    (xs "extension")
+                                                                 ::hs/multi   [1 1]}]}]}
+               (xs "extension")      {::hs/attrs   {(xs "base") {::hs/type qname}}
+                                      ::hs/content [::hs/sequence
+                                                    {::hs/vals [{::hs/element (xs "sequence")
+                                                                 ::hs/type    (xs "sequence")
+                                                                 ::hs/multi   [0 1]}
+                                                                {::hs/element (xs "choice")
+                                                                 ::hs/type    (xs "choice")
+                                                                 ::hs/multi   [0 1]}
+                                                                {::hs/element (xs "attribute")
+                                                                 ::hs/type    (xs "attribute")
+                                                                 ::hs/multi   [0 :n]}]}]}
+               (xs "sequence")       {::hs/content [::hs/choice
+                                                    {::hs/multi [0 :n]
+                                                     ::hs/elems {(xs "element")
+                                                                 {::hs/type (xs "element")}}}]}
+               (xs "choice")         {::hs/content [::hs/choice
+                                                    {::hs/multi [0 :n]
+                                                     ::hs/elems {(xs "element")
+                                                                 {::hs/type (xs "element")}}}]}
+               (xs "attribute")      {::hs/attrs {(xs "name")    {::hs/type string}
+                                                  (xs "type")    {::hs/type qname}
+                                                  (xs "form")    {::hs/type (xs "formChoice")}
+                                                  (xs "default") {::hs/type string}
+                                                  (xs "use")     {::hs/type ::use-type}}}}})
 
 (defn parse-all-nni [opts value]
   (if (= value "unbounded")

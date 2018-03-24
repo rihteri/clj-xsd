@@ -30,20 +30,21 @@
        (sc/transform [sc/MAP-VALS] rename-xs)
        (assoc type ::hs/attrs)))
 
-(defn fix-one-seq-el [tns {max-occurs ::xs/max-occurs
-                       min-occurs ::xs/min-occurs
-                       name       ::xs/name
-                       :as        el}]
+(defn fix-multi [{:keys [::xs/min-occurs ::xs/max-occurs] :as type}]
+  (-> type
+      (assoc ::hs/multi [(or min-occurs 1) (or max-occurs 1)])
+      (dissoc ::xs/min-occurs ::xs/max-occurs)))
+
+(defn fix-one-seq-el [tns {name ::xs/name :as el}]
   (-> el
       (set/rename-keys {::xs/type ::hs/type})
-      (dissoc ::xs/max-occurs ::xs/min-occurs ::xs/name ::xs/element)
+      (dissoc ::xs/name ::xs/element)
       (assoc ::hs/element [tns name])
-      (assoc ::hs/multi [min-occurs max-occurs])))
+      fix-multi))
 
 (defn fix-seq-el [tns seq]
   (->> seq
-       (map ::xs/element)
-       first
+       ::xs/element
        (map (partial fix-one-seq-el tns))))
 
 (defmulti fix-sub-el-clause (fn [_ [type _]] type) )
@@ -65,6 +66,16 @@
        (filter some?)
        first))
 
+(defn unwrap-extension [type]
+  (let [base (-> type
+                 (get-in [::xs/complex-content ::xs/extension ::xs/base]))]
+    (if base
+      (-> type
+          ::xs/complex-content
+          ::xs/extension
+          (set/rename-keys {::xs/base ::hs/base}))
+      type)))
+
 (defn fix-content [tns type]
   (-> type
       (assoc ::hs/content (make-content-clause tns type))
@@ -81,7 +92,8 @@
        (group-types tns)
        (sc/transform [sc/MAP-VALS] (comp fix-type
                                          (partial fix-attrs tns)
-                                         (partial fix-content tns)))))
+                                         (partial fix-content tns)
+                                         unwrap-extension))))
 
 (defn fix-elems [{:keys [::xs/element] :as schema} tns]
   (-> schema
