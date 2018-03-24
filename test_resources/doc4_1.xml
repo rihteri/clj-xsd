@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<top xmlns="http://example.org/test-schema-4"
+     att="asdf">
+  <ugh>
+    <c>123</c>
+    <c>!!!</c>
+  </ugh>
+</top>

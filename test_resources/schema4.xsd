@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:ex="http://example.org/test-schema-1"
+           xmlns="http://example.org/test-schema-1"
+           targetNamespace="http://example.org/test-schema-4">
+  <xs:element name="top">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="ugh">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="c" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+      <xs:attribute name="att" type="xs:string" />
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

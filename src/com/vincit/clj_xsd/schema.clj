@@ -13,9 +13,7 @@
 
 (s/def ::id string?)
 
-(s/def ::type
-  (s/or :qname ::qname
-        :anon  keyword?))
+(s/def ::type ::qname)
 
 (s/def ::element
   (s/keys))
@@ -43,4 +41,4 @@
   (s/map-of ::qname ::attr))
 
 (s/def ::schema
-  (s/keys :req [::elems ::types]))
+  (s/keys :req [::elems] :opt [::types]))

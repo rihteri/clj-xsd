@@ -53,10 +53,16 @@
                                                                  {::hs/type (xs "element")}
                                                                  (xs "complexType")
                                                                  {::hs/type (xs "complexType")}}}]}
-               (xs "element")        {::hs/attrs {(xs "name")      {::hs/type ncname}
-                                                  (xs "type")      {::hs/type qname}
-                                                  (xs "minOccurs") {::hs/type integer}
-                                                  (xs "maxOccurs") {::hs/type (xs "allNNI")}}}
+               (xs "element")        {::hs/attrs   {(xs "name")      {::hs/type ncname}
+                                                    (xs "type")      {::hs/type qname}
+                                                    (xs "minOccurs") {::hs/type integer}
+                                                    (xs "maxOccurs") {::hs/type (xs "allNNI")}}
+                                      ::hs/content [::hs/sequence {::hs/vals [{::hs/element (xs "complexType")
+                                                                               ::hs/type    (xs "complexType")
+                                                                               ::hs/multi   [0 1]}
+                                                                              {::hs/element (xs "attribute")
+                                                                               ::hs/type    (xs "attribute")
+                                                                               ::hs/multi   [0 :n]}]}]}
                (xs "complexType")    {::hs/attrs   {(xs "name") {::hs/type ncname}}
                                       ::hs/content [::hs/sequence
                                                     {::hs/vals [{::hs/element (xs "sequence")
@@ -98,7 +104,7 @@
                                                   (xs "type")    {::hs/type qname}
                                                   (xs "form")    {::hs/type (xs "formChoice")}
                                                   (xs "default") {::hs/type string}
-                                                  (xs "use")     {::hs/type ::use-type}}}}})
+                                                  (xs "use")     {::hs/type (xs "useType")}}}}})
 
 (defn parse-all-nni [opts value]
   (if (= value "unbounded")
@@ -123,4 +129,4 @@
    {:com.vincit.clj-xsd.core/simple
     {(xs "allNNI")     parse-all-nni
      (xs "formChoice") parse-form-choice
-     ::use-type        parse-use-attr}}})
+     (xs "useType")    parse-use-attr}}})

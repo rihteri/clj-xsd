@@ -17,9 +17,8 @@
   (let [el            (first elements)
         el-name       (hx/extract-tag (:tag el))
         el-def        (get-in content-def [::hs/elems el-name])
-        type-to-parse (::hs/type el-def)
         kw            (utils/make-kw opts el-name)
-        parsed        (parse-element opts schema type-to-parse nil el)
+        parsed        (parse-element opts schema el-def el)
         my-result     {kw (if (or (utils/is-plural? content-def)
                                   (utils/is-plural? el-def))
                             [parsed]
@@ -39,7 +38,6 @@
              (not (empty? (-> content-def ::hs/vals))))
     (let [cur-el-def       (-> content-def ::hs/vals first)
           element-to-parse (::hs/element cur-el-def)
-          type-to-parse    (::hs/type cur-el-def)
           is-type?         (partial utils/element-is? element-to-parse)
           elements-of-type (take-while is-type? elements)
           do-parse-next    (partial parse-content
@@ -51,8 +49,7 @@
           result           (map (partial parse-element
                                          opts
                                          schema
-                                         type-to-parse
-                                         nil) elements-of-type)
+                                         cur-el-def) elements-of-type)
           result           (if (utils/is-plural? cur-el-def)
                              result
                              (first result))
@@ -81,14 +78,14 @@
 (def xsi-type-kw
   :xmlns.http%3A%2F%2Fwww.w3.org%2F2001%2FXMLSchema-instance/type)
 
-(defn parse-element [opts schema el-type el-type-def element]
+(defn parse-element [opts schema el-def element]
   (let [opts        (utils/update-ns opts element)
         xsi-type    (some->> element
                              :attrs
                              xsi-type-kw
                              (parsers/parse-qname opts))
-        el-type     (or xsi-type el-type)
-        el-type-def (->> (or el-type-def (get-in schema [::hs/types el-type]))
+        el-type     (or xsi-type (::hs/type el-def))
+        el-type-def (->> (or (::hs/type-def el-def) (get-in schema [::hs/types el-type]))
                          (ep/unwrap-type schema))
         attrs-def   (::hs/attrs el-type-def)
         attrs       (attrs/parse-attrs opts schema attrs-def element)
@@ -108,10 +105,9 @@
                                   #(merge default-simple-parsers %))
                        (assoc ::xml/nss namespaces))
         curr-el    (-> element :tag hx/extract-tag)
-        el-type    (get-in schema [::hs/elems curr-el ::hs/type])
+        el-def     (get-in schema [::hs/elems curr-el])
         content    (parse-element opts
                                   schema
-                                  el-type
-                                  nil ; TODO inline type
+                                  el-def
                                   element)]
     {(utils/make-kw opts curr-el) content}))

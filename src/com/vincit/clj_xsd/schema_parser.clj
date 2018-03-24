@@ -35,12 +35,15 @@
       (assoc ::hs/multi [(or min-occurs 1) (or max-occurs 1)])
       (dissoc ::xs/min-occurs ::xs/max-occurs)))
 
+(declare fix-type-def)
+
 (defn fix-one-seq-el [tns {name ::xs/name :as el}]
-  (-> el
-      (set/rename-keys {::xs/type ::hs/type})
-      (dissoc ::xs/name ::xs/element)
-      (assoc ::hs/element [tns name])
-      fix-multi))
+  (->> (-> el
+           (set/rename-keys {::xs/type ::hs/type})
+           (dissoc ::xs/name ::xs/element)
+           (assoc ::hs/element [tns name])
+           fix-multi)
+       (fix-type-def tns)))
 
 (defn fix-seq-el [tns seq]
   (->> seq
@@ -86,34 +89,45 @@
     true           (dissoc ::xs/attribute)
     (empty? attrs) (dissoc ::hs/attrs)))
 
+(defn fix-one-type [tns type]
+  (->> type
+       unwrap-extension
+       (fix-content tns)
+       (fix-attrs tns)
+       fix-type))
+
 (defn fix-types [tns kind parsed]
   (->> parsed
        kind
        (group-types tns)
-       (sc/transform [sc/MAP-VALS] (comp fix-type
-                                         (partial fix-attrs tns)
-                                         (partial fix-content tns)
-                                         unwrap-extension))))
+       (sc/transform [sc/MAP-VALS] (partial fix-one-type tns))))
+
+(defn fix-type-def
+  "turn anonymous type definition to internal format"
+  [tns {:keys [::xs/complex-type] :as type}]
+  (cond-> (dissoc type ::xs/complex-type)
+    (some? complex-type) (assoc ::hs/type-def (fix-one-type tns complex-type))))
 
 (defn fix-elems [{:keys [::xs/element] :as schema} tns]
   (-> schema
       (dissoc ::xs/element)
       (assoc ::hs/elems (->> (group-types tns element)
-                             (sc/transform [sc/MAP-VALS] rename-xs)))))
+                             (sc/transform [sc/MAP-VALS] (comp rename-xs
+                                                               (partial fix-type-def tns)))))))
 
 (defn schema-to-internal
   "
   Turns a parsed schema document into a more
   consice internal representation"
   [{parsed ::xs/schema}]
-  (let [tns               (::xs/target-namespace parsed)
-        complex           (fix-types tns ::xs/complex-type parsed)
-        simple            (fix-types tns ::xs/simple-type parsed)]
-    (-> parsed
-        (set/rename-keys {::xs/target-namespace       ::hs/tns
-                          ::xs/element-form-default   ::hs/el-default
-                          ::xs/attribute-form-default ::hs/attr-default})
-        (fix-elems tns)
-        (assoc ::hs/types (merge complex
-                                 simple))
-        (dissoc ::xs/complex-type ::xs/simple-type))))
+  (let [tns       (::xs/target-namespace parsed)
+        complex   (fix-types tns ::xs/complex-type parsed)
+        simple    (fix-types tns ::xs/simple-type parsed)
+        all-types (merge complex simple)]
+    (cond-> (-> parsed
+                (set/rename-keys {::xs/target-namespace       ::hs/tns
+                                  ::xs/element-form-default   ::hs/el-default
+                                  ::xs/attribute-form-default ::hs/attr-default})
+                (fix-elems tns)
+                (dissoc ::xs/complex-type ::xs/simple-type))
+      (not (empty? all-types)) (assoc ::hs/types all-types))))
