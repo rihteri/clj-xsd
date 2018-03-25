@@ -15,12 +15,12 @@
           parse-namespace))))
 
 (defn extract-tag
-  ([tag]
-   (extract-tag nil tag))
-  ([curr-ns tag]
-   (when tag
-     (let [actual-ns (or (extract-namespace tag) curr-ns)]
-       [actual-ns (name tag)]))))
+  [form curr-ns tag]
+  (when tag
+    (let [actual-ns (or (extract-namespace tag)
+                        (when (not= :com.vincit.clj-xsd.schema/qualified form)
+                          curr-ns))]
+      [actual-ns (name tag)])))
 
 (defn extract-namespace-mappings [top-level-element]
   (-> top-level-element

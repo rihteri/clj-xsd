@@ -162,6 +162,7 @@ little library to understand. The internal format is not stable.
 * pluggable keyword generator
 * CLJS support
 * error reporting - although the aim is not to be a schema validator
+* mixed content complex types
 * ... and of course serialization
 
 ## License

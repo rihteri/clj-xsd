@@ -3,7 +3,8 @@
             [com.vincit.clj-xsd.parser.default-parsers :as parsers]
             [com.vincit.clj-xsd.schema :as hs]
             [clojure.data.xml :as xml]
-            [camel-snake-kebab.core :as csk]))
+            [camel-snake-kebab.core :as csk]
+            [com.vincit.clj-xsd.parser.context :as pcont]))
 
 (def parsers-key :com.vincit.clj-xsd.core/parsers)
 (def simple-parsers-path
@@ -30,19 +31,22 @@
            (parsers/parse-string opts)
            (simple-type-parser opts)))))
 
-(defn element-is? [type {:keys [tag] :as todo}]
-   (= (hx/extract-tag tag)
-      type))
+(defn element-is? [{{:keys [::hs/el-default]} ::hs/schema
+                    curr-ns                   ::pcont/curr-ns}
+                   el-name
+                   {:keys [tag]}]
+   (= (hx/extract-tag el-default curr-ns tag)
+      el-name))
+
+(defn element-in? [opts el-names el]
+  (->> el-names
+       (some #(element-is? opts % el))
+       some?))
 
 (defn is-plural? [element-def]
   (let [upper-bound (-> element-def
                         ::hs/multi
                         second)]
     (and upper-bound
-         (or (= :n upper-bound) (> 1 upper-bound)))))
+         (or (= :n upper-bound) (> upper-bound 1)))))
 
-(defn update-ns [opts element]
-  (let [curr-ns (-> element :tag hx/extract-namespace)]
-    (if curr-ns
-      (assoc opts :com.vincit.clj-xsd.parser/curr-ns curr-ns)
-      opts)))

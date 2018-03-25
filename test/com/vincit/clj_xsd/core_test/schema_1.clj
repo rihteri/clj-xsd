@@ -62,16 +62,11 @@
    ::numa 42})
 
 (t/deftest parsing-doc
-  (t/is (= expected-doc
-           (with-open [file (io/input-stream data-1)]
+  (with-open [file (io/input-stream data-1)]
+    (t/is (= expected-doc
              (::top (hipsterprise/parse opts
                                         expected-schema
-                                        file)))))
-  (t/is (= expected-doc
-           (with-open [file   (io/input-stream data-1)
-                       schema (io/input-stream schema-1)]
-             (let [schema-parsed (hipsterprise/read-schema schema)]
-               (::top (hipsterprise/parse opts schema-parsed file)))))))
+                                        file))))))
 
 (defn unord= [vals]
   (apply = (map #(apply hash-set %) vals)))

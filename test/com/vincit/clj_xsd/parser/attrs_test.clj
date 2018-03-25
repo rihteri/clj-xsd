@@ -8,7 +8,8 @@
             [clojure.data.xml :as xml]
             [com.vincit.clj-xsd.metaschema :as metaschema]
             [com.vincit.clj-xsd.parser :as parser]
-            [com.vincit.clj-xsd.parser.utils :as utils]))
+            [com.vincit.clj-xsd.parser.utils :as utils]
+            [com.vincit.clj-xsd.parser.context :as pcont]))
 
 (st/instrument (st/enumerate-namespace 'com.vincit.clj-xsd.parser.attrs))
 
@@ -45,17 +46,21 @@
   {:com.vincit.clj-xsd.core/namespaces {tns *ns*}})
 
 (t/deftest parse-attrs-optionals
-  (let [expected {::soma "ugh"         ; default
-                  ::ana  "another attr" } ; not default
-        parsed   (sut/parse-attrs parse-opts (schema attrs-def) attrs-def xml-map)]
+  (let [expected {::soma "ugh"
+                  ::ana  "another attr" }
+        context  (-> parse-opts
+                     (assoc ::hs/schema (schema attrs-def)))
+        parsed   (sut/parse-attrs context attrs-def xml-map)]
     (t/is (= expected parsed) "attr defaults respected")))
 
 
 (t/deftest parse-attrs-types
-  (let [attr-def {[tns "numa"] {::hs/type    xs/integer
-                                ::hs/default "42"
-                                ::hs/form    ::hs/unqualified}}
-        expected {:numa 42}
+  (let [attr-def   {[tns "numa"] {::hs/type    xs/integer
+                                  ::hs/default "42"
+                                  ::hs/form    ::hs/unqualified}}
+        expected   {:numa 42}
         parse-opts (assoc-in {} utils/simple-parsers-path parser/default-simple-parsers)
-        parsed (sut/parse-attrs parse-opts (schema attr-def) attr-def xml-map)]
+        context    (-> parse-opts
+                       (assoc ::hs/schema (schema attr-def)))
+        parsed     (sut/parse-attrs parse-opts attr-def xml-map)]
     (t/is (= expected parsed))))

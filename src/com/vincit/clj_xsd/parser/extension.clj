@@ -31,8 +31,8 @@
       (update ::hs/attrs (partial merge (::hs/attrs base)))
       (update ::hs/content (partial merge-content (::hs/content base)))))
 
-(defn unwrap-type [schema {:keys [::hs/base] :as type}]
+(defn unwrap-type [{:keys [::hs/schema] :as context} {:keys [::hs/base] :as type}]
   (-> (some->> (get-in schema [::hs/types base])
-              (unwrap-type schema))
+              (unwrap-type context))
       (merge-base type)))
 

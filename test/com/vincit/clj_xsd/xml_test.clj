@@ -5,4 +5,4 @@
 
 (t/deftest tag-extraction
   (t/is (= [xs/sns "schema"]
-           (hx/extract-tag :xmlns.http%3A%2F%2Fwww.w3.org%2F2001%2FXMLSchema/schema))))
+           (hx/extract-tag nil nil :xmlns.http%3A%2F%2Fwww.w3.org%2F2001%2FXMLSchema/schema))))

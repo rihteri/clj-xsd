@@ -4,7 +4,8 @@
             [com.vincit.clj-xsd.schema :as hs]
             [com.rpl.specter :as sc]
             [clojure.pprint :as pp]
-            [clojure.spec.alpha :as s]))
+            [clojure.spec.alpha :as s]
+            [com.vincit.clj-xsd.parser.context :as pcont]))
 
 (defn is-correctly-namespaced? [maybe-attr-def tag]
   (let [form (::hs/form maybe-attr-def)]
@@ -16,9 +17,10 @@
     (or (when parser (partial parser opts))
         (fn [val] val))))
 
-(defn parse-attr [opts schema attrs-def [tag val]]
-  (let [curr-ns   (:com.vincit.clj-xsd.parser/curr-ns opts)
-        attr-name (hx/extract-tag curr-ns tag)
+(defn parse-attr [opts attrs-def [tag val]]
+  (let [curr-ns   (::pcont/curr-ns opts)
+        form      (-> opts ::hs/schema ::hs/attr-default)
+        attr-name (hx/extract-tag form curr-ns tag)
         attr-def  (get attrs-def attr-name)
         type      (::hs/type attr-def)
         parser    (get-parser opts type)]
@@ -42,14 +44,13 @@
 
 (s/fdef parse-attrs
         :params (s/cat :opts (constantly true)
-                       :schema ::hs/schema
                        :attrs-def ::hs/attrs
                        :element (s/keys)))
 
-(defn parse-attrs [opts schema attrs-def element]
+(defn parse-attrs [opts attrs-def element]
   (let [attrs         (:attrs element)
         defaults      (get-defaults opts attrs-def)
-        attrs-present (->> (map (partial parse-attr opts schema attrs-def) (:attrs element))
+        attrs-present (->> (map (partial parse-attr opts attrs-def) (:attrs element))
                            (apply concat)
                            (apply hash-map))]
     (when attrs-def
