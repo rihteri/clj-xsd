@@ -95,7 +95,11 @@
                (xs "sequence")       {::hs/content [::hs/choice
                                                     {::hs/multi [0 :n]
                                                      ::hs/elems {(xs "element")
-                                                                 {::hs/type (xs "element")}}}]}
+                                                                 {::hs/type (xs "element")}
+                                                                 (xs "choice")
+                                                                 {::hs/type (xs "choice")}
+                                                                 (xs "sequence")
+                                                                 {::hs/type (xs "sequence")}}}]}
                (xs "choice")         {::hs/content [::hs/choice
                                                     {::hs/multi [0 :n]
                                                      ::hs/elems {(xs "element")

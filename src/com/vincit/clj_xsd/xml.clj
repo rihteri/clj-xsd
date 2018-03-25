@@ -8,11 +8,10 @@
       (str/replace #"%2F" "/")))
 
 (defn extract-namespace [tag]
-  (let [namespace-encoded (namespace tag)]
-    (when namespace-encoded
-      (-> namespace-encoded
+  (some-> tag
+          namespace
           (str/replace #"^xmlns\." "")
-          parse-namespace))))
+          parse-namespace))
 
 (defn extract-tag
   [form curr-ns tag]

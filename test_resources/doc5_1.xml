@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ex:top xmlns:ex="http://example.org/test-schema-5">
+  <nummer>1</nummer>
+  <nummer>2</nummer>
+  <stringer>strer</stringer>
+  <nummer>3</nummer>
+  <someMore>
+    asdf
+  </someMore>
+</ex:top>

@@ -50,3 +50,8 @@
     (and upper-bound
          (or (= :n upper-bound) (> upper-bound 1)))))
 
+(defn get-max-occurs [el-def]
+  (or (->> el-def
+           ::hs/multi
+           last)
+      1))

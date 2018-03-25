@@ -6,31 +6,54 @@
             [com.vincit.clj-xsd.parser.context :as pcont]
             [com.vincit.clj-xsd.parser.element :as pe]))
 
-(defmethod cp/parse-content ::hs/choice [opts content-def elements]
-  (let [choice-def (second content-def)
-        el         (first elements)
-        is-mine?   (constantly true) #_ (partial utils/element-in?
-                                                 opts
-                                                 (->> choice-def
-                                                      ::hs/elems
-                                                      (map ::hs/element)))
-        curr-ns    (::pcont/curr-ns opts)
-        el-name    (hx/extract-tag (-> opts ::hs/schema ::hs/el-default) curr-ns (:tag el))
-        el-def     (get-in choice-def [::hs/elems el-name])
-        kw         (utils/make-kw opts el-name)
-        parsed     (when (is-mine? el)
-                     (pe/parse-element opts el-def el))
-        me-plural? (utils/is-plural? choice-def)
-        my-result  (when (is-mine? el)
-                     {kw (if (or me-plural?
-                                 (utils/is-plural? el-def))
-                           [parsed]
-                           parsed)})
-        more-elems (when (and me-plural?
-                              (not (empty? (take-while is-mine? (rest elements)))))
-                     (cp/parse-content opts
-                                       content-def
-                                       (rest elements)))]
-    (if (empty? more-elems)
-      my-result
-      (merge-with concat my-result more-elems))))
+(defn is-mine? [context choice-def element]
+  (utils/element-in? context
+                     (->> choice-def
+                          ::hs/elems
+                          keys)
+                     element))
+
+(defn extract-tag [context el]
+  (let [curr-ns    (::pcont/curr-ns context)
+        el-default (-> context ::hs/schema ::hs/el-default)]
+    (->> el
+         :tag
+         (hx/extract-tag el-default curr-ns))))
+
+(defn parse-one [context el-def plural? el]
+  (let [parsed (pe/parse-element context el-def el)]
+    (if plural?
+      [parsed]
+      parsed)))
+
+(defn split-curr-next [context choice-def elements]
+  (let [max-occurs (utils/get-max-occurs choice-def)
+        is-mine?   (partial is-mine? context choice-def)
+        [this other] (split-with is-mine? elements)]
+    (if (and (not= max-occurs :n)
+             (> (count this) max-occurs))
+      (split-at max-occurs elements)
+      [this other])))
+
+(defn parse-one-kvp [context el-defs plural? el]
+  (let [el-name (extract-tag context el)
+        kw      (utils/make-kw context el-name)
+        el-def  (get el-defs el-name)]
+    {kw (parse-one context el-def plural? el)}))
+
+(defn parse-all [context choice-def accum]
+  (let [[els-curr els-next] (split-curr-next context choice-def (::cp/elements accum))
+        el-defs             (::hs/elems choice-def)
+        plural?             (utils/is-plural? choice-def)
+        prev-result         (::cp/result accum)]
+    (-> accum
+        (assoc ::cp/result (merge prev-result
+                                  (->> els-curr
+                                       (map (partial parse-one-kvp context el-defs plural?))
+                                       (apply merge-with concat))))
+        (assoc ::cp/elements els-next))))
+
+(defmethod cp/parse-content ::hs/choice [context content-def accum]
+  (parse-all context
+             (second content-def)
+             accum))
