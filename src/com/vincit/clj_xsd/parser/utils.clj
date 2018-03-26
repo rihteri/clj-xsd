@@ -1,10 +1,10 @@
 (ns com.vincit.clj-xsd.parser.utils
   (:require [com.vincit.clj-xsd.xml :as hx]
-            [com.vincit.clj-xsd.parser.default-parsers :as parsers]
             [com.vincit.clj-xsd.schema :as hs]
             [clojure.data.xml :as xml]
             [camel-snake-kebab.core :as csk]
-            [com.vincit.clj-xsd.parser.context :as pcont]))
+            [com.vincit.clj-xsd.parser.context :as pcont]
+            [clojure.string :as str]))
 
 (def parsers-key :com.vincit.clj-xsd.core/parsers)
 (def simple-parsers-path
@@ -23,12 +23,18 @@
                      str)
              (csk/->kebab-case elname))))
 
+(defn parse-string [content]
+  (->> content
+       (filter string?)
+       (str/join)
+       (str/trim)))
+
 (defn make-element-parser [simple-type-parser]
   (when simple-type-parser
     (fn [opts element]
       (->> element
            :content
-           (parsers/parse-string opts)
+           parse-string
            (simple-type-parser opts)))))
 
 (defn element-is? [{{:keys [::hs/el-default]} ::hs/schema
@@ -55,3 +61,11 @@
            ::hs/multi
            last)
       1))
+
+(defn extract-tag [context el]
+  (let [curr-ns    (::pcont/curr-ns context)
+        el-default (-> context ::hs/schema ::hs/el-default)]
+    (->> el
+         :tag
+         (hx/extract-tag el-default curr-ns))))
+

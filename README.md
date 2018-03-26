@@ -120,7 +120,7 @@ You can get a nice clojure representation of the document like this:
            :numeric-attribute 987           ; it's a number!
            :optional-element  {:some-string "jabada"
                                :some-number 1}
-           :mandatry-element  "asdf"
+           :mandatory-element  "asdf"
            :repeating-element ("yippee" "!!!")}}    ; it's a list!
 
        ; ... and the keys would have been namespaced if we provided a
@@ -138,6 +138,14 @@ yourself if you don't have an XML Schema available but would like to
 guess the structure of your document. Or if the schema is too hard for this
 little library to understand. The internal format is not stable.
 
+You can attach custom parsers for simple- and complex types. See 
+com.vincit.clj-xsd.parser.custom.* for examples. There is also a
+generic order-preserving parser which can read sequences with nested
+groups without losing the element order.
+
+You can also attach post-processing functions which are invoked every
+time an element of a specific type is processed.
+
 ## Things that may work
 * producing clojure data structures with namespaced keys
 * some simple types - like xs:integer - will have the correct type in the deserialization result
@@ -146,12 +154,13 @@ little library to understand. The internal format is not stable.
 * xsi:type schema overrides
 * complex type extensions
 * anonymous types
-* pluggable type handling, at least for simple types
+* pluggable type handling for simple and complex types
+* type-specific postprocessing functions
 
 ## TODO
-* add tests and fix complicated nested choice/sequence combos (some of these might prove impossible to support)
-* make sure support for custom complex type parser functions works, allowing the lib to be useful even below 100% functionality
-* more simple type deserializers and choosing deserializer for a general simple type if one is not available for an extended type
+* sequences within choices
+* more simple type deserializers 
+* choosing deserializer for a general simple type if one is not available for an extended type
 * anonymous simple types
 * attribute and element refs
 * attribute and element groups
@@ -162,7 +171,7 @@ little library to understand. The internal format is not stable.
 * pluggable keyword generator
 * CLJS support
 * error reporting - although the aim is not to be a schema validator
-* mixed content complex types
+* mixed content complex types (order-preserving might work here?)
 * ... and of course serialization
 
 ## License

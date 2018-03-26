@@ -4,6 +4,7 @@
             [clojure.java.io :as io]
             [com.vincit.clj-xsd.schema :as hs]
             [com.vincit.clj-xsd.core :as hipsterprise]
+            [com.vincit.clj-xsd.metaschema.options :as xs-opts]
             [com.vincit.clj-xsd.metaschema :as xs]
             [clojure.data.xml :as xml]
             [com.rpl.specter :as sc]
@@ -80,7 +81,6 @@
         both [exp act]]
     (t/is (unord= (map keys both)))
     (t/is (unord= (extract [::hs/types sc/MAP-KEYS] both)))
-    (t/is (unord= (extract [::hs/types sc/MAP-VALS sc/MAP-KEYS] both)))
     (t/is (unord= (extract [::hs/types sc/MAP-VALS ::hs/attrs sc/MAP-KEYS] both)))
     (t/is (unord= (extract [::hs/types
                             (sc/keypath (ex "topType"))
@@ -91,10 +91,6 @@
     (let [[exp act] (extract [::hs/types sc/MAP-VALS ::hs/attrs sc/MAP-VALS] both)]
       (t/is (= exp act)
             "attributes"))
-    (let [[exp act] (extract [::hs/types sc/MAP-VALS ::hs/content sc/LAST ::hs/vals sc/FIRST] both)]
-      (t/is (= exp act)))
-    (let [[exp act] (extract [::hs/types sc/MAP-VALS ::hs/content] both)]
-      (t/is (= exp act)))
     (let [[exp act] (extract [::hs/elems sc/MAP-VALS] both)]
       (t/is (= exp act)))
     (t/is (= exp act))))
@@ -110,27 +106,34 @@
                                                 ::xs/form ::hs/qualified}
                                                {::xs/name "numa"
                                                 ::xs/type xs/integer}]
-                               ::xs/sequence  {::xs/element [{::xs/name       "a"
-                                                              ::xs/type       (ex "subType")
-                                                              ::xs/min-occurs 0
-                                                              ::xs/max-occurs 1}
-                                                             {::xs/name       "b"
-                                                              ::xs/type       xs/string
-                                                              ::xs/min-occurs 1
-                                                              ::xs/max-occurs 1}
-                                                             {::xs/name       "c"
-                                                              ::xs/type       xs/string
-                                                              ::xs/min-occurs 0
-                                                              ::xs/max-occurs :n}]}}
+                               ::xs/sequence   [{}
+                                                [::xs/element
+                                                 {::xs/name       "a"
+                                                  ::xs/type       (ex "subType")
+                                                  ::xs/min-occurs 0
+                                                  ::xs/max-occurs 1}]
+                                                [::xs/element
+                                                 {::xs/name       "b"
+                                                  ::xs/type       xs/string
+                                                  ::xs/min-occurs 1
+                                                  ::xs/max-occurs 1}]
+                                                [::xs/element
+                                                 {::xs/name       "c"
+                                                  ::xs/type       xs/string
+                                                  ::xs/min-occurs 0
+                                                  ::xs/max-occurs :n}]]}
                               {::xs/name     "subType"
-                               ::xs/sequence {::xs/element [{::xs/name       "ugh"
-                                                             ::xs/type       xs/string
-                                                             ::xs/min-occurs 1
-                                                             ::xs/max-occurs 1}
-                                                            {::xs/name       "argh"
-                                                             ::xs/type       xs/integer
-                                                             ::xs/min-occurs 1
-                                                             ::xs/max-occurs 1}]}}]})
+                               ::xs/sequence [{}
+                                              [::xs/element
+                                               {::xs/name       "ugh"
+                                                ::xs/type       xs/string
+                                                ::xs/min-occurs 1
+                                                ::xs/max-occurs 1}]
+                                              [::xs/element
+                                               {::xs/name       "argh"
+                                                ::xs/type       xs/integer
+                                                ::xs/min-occurs 1
+                                                ::xs/max-occurs 1}]]}]})
 
 (t/deftest is-test-valid?
   (t/is (s/valid? ::hs/schema expected-schema)))
@@ -155,18 +158,17 @@
 
 (t/deftest parsing-schema
   (let [parse-result (with-open [sch (io/input-stream schema-1)]
-                       (-> (hipsterprise/parse xs/parse-opts
-                                               xs/schemaschema
-                                               sch)
+                       (->> sch
+                            (hipsterprise/parse (dissoc xs-opts/parse-opts
+                                                        ::hipsterprise/post)
+                                                xs/schemaschema)
                            ::xs/schema))]
     (t/is (is-same? ::xs/element expected-parsed-schema parse-result))
     (t/is (is-same? ::xs/target-namespace expected-parsed-schema parse-result))
-    (t/is (is-same? get-sequence expected-parsed-schema parse-result))
     (t/is (is-same? get-name expected-parsed-schema parse-result))
     (let [attr-exp (get-attr expected-parsed-schema)
           attr-res (get-attr parse-result)]
       (t/is (= attr-exp attr-res)))
-    (t/is (is-same? ::xs/complex-type expected-parsed-schema parse-result))
     (t/is (= expected-parsed-schema
              parse-result))))
 

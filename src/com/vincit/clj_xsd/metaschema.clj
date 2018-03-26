@@ -2,18 +2,9 @@
   "
   The internal description of the XML Schema file
   "
-  (:require [com.vincit.clj-xsd.xml :as hx]
-            [com.vincit.clj-xsd.parser.default-parsers :as parsers]
-            [com.vincit.clj-xsd.schema :as hs]
-            [clojure.spec.alpha :as s]))
-
-(def sns
-  "XML Schema namespace"
-  "http://www.w3.org/2001/XMLSchema")
-
-(def xsi-ns
-  "XML Schema Instance namespace"
-  "http://www.w3.org/2001/XMLSchema-instance")
+  (:require [com.vincit.clj-xsd.schema :as hs]
+            [clojure.spec.alpha :as s]
+            [com.vincit.clj-xsd.metaschema.nss :as xs-nss]))
 
 (s/fdef xs
         :args (s/cat :name ::hs/name)
@@ -22,7 +13,7 @@
 (defn xs
 "Make an NCName in the XMLSchema namespace"
   [name]
-  [sns name])
+  [xs-nss/sns name])
 
 (def string
   (xs "string"))
@@ -92,7 +83,9 @@
                                                                 {::hs/element (xs "attribute")
                                                                  ::hs/type    (xs "attribute")
                                                                  ::hs/multi   [0 :n]}]}]}
-               (xs "sequence")       {::hs/content [::hs/choice
+               (xs "sequence")       {::hs/attrs   {(xs "minOccurs") {::hs/type integer}
+                                                    (xs "maxOccurs") {::hs/type (xs "allNNI")}}
+                                      ::hs/content [::hs/choice
                                                     {::hs/multi [0 :n]
                                                      ::hs/elems {(xs "element")
                                                                  {::hs/type (xs "element")}
@@ -100,7 +93,9 @@
                                                                  {::hs/type (xs "choice")}
                                                                  (xs "sequence")
                                                                  {::hs/type (xs "sequence")}}}]}
-               (xs "choice")         {::hs/content [::hs/choice
+               (xs "choice")         {::hs/attrs   {(xs "minOccurs") {::hs/type integer}
+                                                    (xs "maxOccurs") {::hs/type (xs "allNNI")}}
+                                      ::hs/content [::hs/choice
                                                     {::hs/multi [0 :n]
                                                      ::hs/elems {(xs "element")
                                                                  {::hs/type (xs "element")}}}]}
@@ -109,28 +104,3 @@
                                                   (xs "form")    {::hs/type (xs "formChoice")}
                                                   (xs "default") {::hs/type string}
                                                   (xs "use")     {::hs/type (xs "useType")}}}}})
-
-(defn parse-all-nni [opts value]
-  (if (= value "unbounded")
-    :n
-    (parsers/parse-integer opts value)))
-
-(defn parse-form-choice [opts value]
-  (case value
-    "qualified" ::hs/qualified
-    "unqualified" ::hs/unqualified))
-
-(defn parse-use-attr [opts value]
-  (case value
-    "optional"   ::hs/optional
-    "prohibited" ::hs/prohibited
-    "required"   ::hs/required))
-
-(def parse-opts
-"Default parsing options for schema documents"
-  {:com.vincit.clj-xsd.core/namespaces {sns 'com.vincit.clj-xsd.metaschema}
-   :com.vincit.clj-xsd.core/parsers
-   {:com.vincit.clj-xsd.core/simple
-    {(xs "allNNI")     parse-all-nni
-     (xs "formChoice") parse-form-choice
-     (xs "useType")    parse-use-attr}}})

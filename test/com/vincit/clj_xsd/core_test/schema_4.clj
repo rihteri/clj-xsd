@@ -21,7 +21,6 @@
                  ::hs/content
                  [::hs/sequence
                   {::hs/vals [{::hs/element [tns "ugh"]
-                               ::hs/multi   [1 1]
                                ::hs/type-def
                                {::hs/content
                                 [::hs/sequence

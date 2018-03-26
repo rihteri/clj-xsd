@@ -3,7 +3,7 @@
             [clojure.java.io :as io]
             [com.vincit.clj-xsd.core :as cxs]
             [com.vincit.clj-xsd.schema :as hs]
-            [com.vincit.clj-xsd.metaschema :as xs]
+            [com.vincit.clj-xsd.metaschema.nss :as xs]
             [clojure.spec.alpha :as s]
             [clojure.data.xml :as xml]
             [com.rpl.specter :as sc]))
@@ -23,14 +23,11 @@
                       {::hs/vals [[::hs/choice
                                    {::hs/multi [0 10]
                                     ::hs/elems {[tns "stringer"]
-                                                {::hs/type  [xs/sns "string"]
-                                                 ::hs/multi [1 1]}
+                                                {::hs/type  [xs/sns "string"]}
                                                 [tns "nummer"]
-                                                {::hs/type  [xs/sns "integer"]
-                                                 ::hs/multi [1 1]}}}]
+                                                {::hs/type  [xs/sns "integer"]}}}]
                                   {::hs/type    [xs/sns "string"]
-                                   ::hs/element [tns "someMore"]
-                                   ::hs/multi   [1 1]}]}]}}})
+                                   ::hs/element [tns "someMore"]}]}]}}})
 
 (defn read-sch []
   (with-open [schema (io/input-stream sch-file-name)]

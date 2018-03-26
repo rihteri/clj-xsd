@@ -1,5 +1,5 @@
 (ns com.vincit.clj-xsd.parser.content.core
-  (:require [com.vincit.clj-xsd.parser.default-parsers :as parsers]
+  (:require [com.vincit.clj-xsd.parser.custom.simple-types :as parsers]
             [com.vincit.clj-xsd.schema :as hs]
             [com.vincit.clj-xsd.parser.utils :as utils]))
 
@@ -10,6 +10,5 @@
         elements    (->> element
                          :content
                          (filter (complement string?)))]
-    (if content-def
-      (::result (parse-content context content-def {::elements elements}))
-      (parsers/parse-string context (:content element)))))
+    (when content-def
+      (::result (parse-content context content-def {::elements elements})))))

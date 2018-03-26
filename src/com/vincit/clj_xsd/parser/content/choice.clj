@@ -13,13 +13,6 @@
                           keys)
                      element))
 
-(defn extract-tag [context el]
-  (let [curr-ns    (::pcont/curr-ns context)
-        el-default (-> context ::hs/schema ::hs/el-default)]
-    (->> el
-         :tag
-         (hx/extract-tag el-default curr-ns))))
-
 (defn parse-one [context el-def plural? el]
   (let [parsed (pe/parse-element context el-def el)]
     (if plural?
@@ -27,8 +20,8 @@
       parsed)))
 
 (defn split-curr-next [context choice-def elements]
-  (let [max-occurs (utils/get-max-occurs choice-def)
-        is-mine?   (partial is-mine? context choice-def)
+  (let [max-occurs   (utils/get-max-occurs choice-def)
+        is-mine?     (partial is-mine? context choice-def)
         [this other] (split-with is-mine? elements)]
     (if (and (not= max-occurs :n)
              (> (count this) max-occurs))
@@ -36,7 +29,7 @@
       [this other])))
 
 (defn parse-one-kvp [context el-defs plural? el]
-  (let [el-name (extract-tag context el)
+  (let [el-name (utils/extract-tag context el)
         kw      (utils/make-kw context el-name)
         el-def  (get el-defs el-name)]
     {kw (parse-one context el-def plural? el)}))

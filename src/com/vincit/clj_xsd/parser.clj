@@ -4,7 +4,7 @@
             [clojure.string :as str]
             [com.vincit.clj-xsd.metaschema :as xs]
             [com.vincit.clj-xsd.parser.utils :as utils]
-            [com.vincit.clj-xsd.parser.default-parsers :as parsers]
+            [com.vincit.clj-xsd.parser.custom.simple-types :as parsers]
             [com.vincit.clj-xsd.parser.attrs :as attrs]
             [com.vincit.clj-xsd.parser.extension :as ep]
             [com.vincit.clj-xsd.parser.element :as pe]
@@ -15,6 +15,7 @@
 
 (def default-simple-parsers
   {xs/integer parsers/parse-integer
+   xs/string  (fn [_ val] val)
    xs/qname   parsers/parse-qname})
 
 (defn parse [opts schema element]
