@@ -7,7 +7,8 @@
             [com.vincit.clj-xsd.metaschema.post.choice :as sp-choice]
             [com.vincit.clj-xsd.metaschema.post.sequence :as sp-sequence]
             [com.vincit.clj-xsd.schema :as hs]
-            [com.vincit.clj-xsd.parser.custom.order-preserving :as order-parser]))
+            [com.vincit.clj-xsd.parser.custom.order-preserving :as order-parser]
+            [com.vincit.clj-xsd.metaschema.post.simple-type :as sp-simple]))
 
 (defn parse-all-nni [opts value]
   (if (= value "unbounded")
@@ -46,4 +47,5 @@
     [xs-nss/sns "complexType"] sp-complex/fix
     [xs-nss/sns "sequence"]    sp-sequence/fix
     [xs-nss/sns "choice"]      sp-choice/fix
-    [xs-nss/sns "element"]     sp-element/fix}})
+    [xs-nss/sns "element"]     sp-element/fix
+    [xs-nss/sns "simpleType"] sp-simple/fix}})

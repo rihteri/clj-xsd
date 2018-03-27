@@ -43,7 +43,9 @@
                                                      ::hs/elems {(xs "element")
                                                                  {::hs/type (xs "element")}
                                                                  (xs "complexType")
-                                                                 {::hs/type (xs "complexType")}}}]}
+                                                                 {::hs/type (xs "complexType")}
+                                                                 (xs "simpleType")
+                                                                 {::hs/type (xs "simpleType")}}}]}
                (xs "element")        {::hs/attrs   {(xs "name")      {::hs/type ncname}
                                                     (xs "type")      {::hs/type qname}
                                                     (xs "minOccurs") {::hs/type integer}
@@ -103,4 +105,15 @@
                                                   (xs "type")    {::hs/type qname}
                                                   (xs "form")    {::hs/type (xs "formChoice")}
                                                   (xs "default") {::hs/type string}
-                                                  (xs "use")     {::hs/type (xs "useType")}}}}})
+                                                  (xs "use")     {::hs/type (xs "useType")}}}
+               (xs "simpleType")     {::hs/attrs   {(xs "id")   {::hs/type (xs "ID")}
+                                                    (xs "name") {::hs/type (xs "NCName")}}
+                                      ::hs/content [::hs/choice
+                                                    {::hs/multi [0 1]
+                                                     ::hs/elems {(xs "restriction")
+                                                                 {::hs/type (xs "restriction")}
+                                                                 (xs "list")
+                                                                 {::hs/type (xs "list")}
+                                                                 (xs "union")
+                                                                 {::hs/type (xs "union")}}}]}
+               (xs "list")           {::hs/attrs {(xs "itemType") {::hs/type (xs "QName")}}}}})

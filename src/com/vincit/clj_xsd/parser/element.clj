@@ -6,7 +6,8 @@
             [com.vincit.clj-xsd.parser.attrs :as attrs]
             [com.vincit.clj-xsd.parser.content.core :as cp]
             [com.vincit.clj-xsd.xml :as hx]
-            [com.vincit.clj-xsd.parser.context :as pcont]))
+            [com.vincit.clj-xsd.parser.context :as pcont]
+            [com.vincit.clj-xsd.parser.simple :as simplep]))
 
 (def xsi-type-kw
   :xmlns.http%3A%2F%2Fwww.w3.org%2F2001%2FXMLSchema-instance/type)
@@ -30,10 +31,16 @@
          (get-parser utils/simple-parsers-path)))))
 
 (defn parse-vanilla [context el-type-def element]
-  (let [attrs-def (::hs/attrs el-type-def)]
-    (apply merge (filter some? [{}
-                                (cp/do-parse-content context el-type-def element)
-                                (attrs/parse-attrs context attrs-def element)]))))
+  (let [attrs-def    (::hs/attrs el-type-def)
+        content-def  (::hs/content el-type-def)
+        parse-simple (partial simplep/parse-simple context el-type-def (:content element))]
+    (if (or attrs-def content-def)
+      (apply merge (filter some? [{}
+                                  (cp/do-parse-content context el-type-def element)
+                                  (when-let [result (parse-simple)]
+                                    {:value result})
+                                  (attrs/parse-attrs context attrs-def element)]))
+      (parse-simple))))
 
 (defn parse-element [context el-def element]
   (let [context       (update-ns context element)

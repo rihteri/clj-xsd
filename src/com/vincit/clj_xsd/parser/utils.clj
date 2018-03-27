@@ -69,3 +69,7 @@
          :tag
          (hx/extract-tag el-default curr-ns))))
 
+(defn assoc-if [m k val]
+  (if val
+    (assoc m k val)
+    m))

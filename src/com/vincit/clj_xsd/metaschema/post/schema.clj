@@ -67,8 +67,7 @@
 (defn fix-types [tns kind parsed]
   (->> parsed
        kind
-       (group-types tns)
-       (sc/transform [sc/MAP-VALS] (partial fix-one-type tns))))
+       (group-types tns)))
 
 (defn fix-type-def
   "turn anonymous type definition to internal format"
@@ -90,7 +89,8 @@
   consice internal representation"
   [parsed]
   (let [tns       (::xs/target-namespace parsed)
-        complex   (fix-types tns ::xs/complex-type parsed)
+        complex   (->> (fix-types tns ::xs/complex-type parsed)
+                       (sc/transform [sc/MAP-VALS] (partial fix-one-type tns)))
         simple    (fix-types tns ::xs/simple-type parsed)
         all-types (merge complex simple)]
     (cond-> (-> parsed
