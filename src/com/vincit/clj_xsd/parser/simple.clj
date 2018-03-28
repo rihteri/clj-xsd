@@ -13,7 +13,7 @@
 (defmulti parse-simple
   (fn [context type-def content]
     (-> type-def
-        (select-keys [::hs/list-of ::hs/restrict ::hs/union-of])
+        (select-keys [::hs/list-of ::hs/base ::hs/union-of])
         first
         first)))
 
@@ -28,20 +28,19 @@
         list-def      (get-type-def context list-type)
         custom-parser (get-parser context list-type)]
     (->> (-> content
-             utils/parse-string
-             (str/split #"\s*"))
+             (str/split #"\s"))
          (filter (complement empty?))
          (map (or (partial custom-parser context)
                   (partial parse-simple context list-def))))))
 
-(defmethod parse-simple ::hs/restrict
+(defmethod parse-simple ::hs/base
   [context type-def content]
-  (let [content   (utils/parse-string content)
-        base-type (::hs/restrict type-def)
+  (let [base-type (::hs/base type-def)
         parser    (get-parser context base-type)]
     (if parser
       (parser context content)
-      (recur context (get-type-def context base-type) content))))
+      (when base-type
+        (recur context (get-type-def context base-type) content)))))
 
 (defn get-custom-or-recursive-parser [context type-name]
   (or (partial (get-parser context type-name) context)
@@ -49,8 +48,7 @@
 
 (defmethod parse-simple ::hs/union-of
   [context type-def content]
-  (let [content (utils/parse-string content)
-        parsers (->> type-def
+  (let [parsers (->> type-def
                      ::hs/union-of
                      (map (partial get-custom-or-recursive-parser context)))]
     (some #(% content) parsers)))

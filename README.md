@@ -158,14 +158,14 @@ time an element of a specific type is processed.
 * type-specific postprocessing functions
 
 ## TODO
+* attribute / element name clashes - e.g. use attributename-attr when element of same name in elements
 * sequences within choices
-* more simple type deserializers 
-* choosing deserializer for a general simple type if one is not available for an extended type
+* more simple type deserializers
+* simpleContent (with attributes)
 * anonymous simple types
 * attribute and element refs
 * attribute and element groups
 * multiple schema files
-* simplify internal schema representation (hopefully 'relaxation' and 'accretion' more than 'breakage')
 * extension improvements (choice -> sequence, choice -> choice etc)
 * produce metaschema by reading the actual W3C XML Schema XSD
 * pluggable keyword generator

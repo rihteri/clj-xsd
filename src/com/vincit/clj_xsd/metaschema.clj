@@ -116,4 +116,7 @@
                                                                  {::hs/type (xs "list")}
                                                                  (xs "union")
                                                                  {::hs/type (xs "union")}}}]}
-               (xs "list")           {::hs/attrs {(xs "itemType") {::hs/type (xs "QName")}}}}})
+               (xs "list")           {::hs/attrs {(xs "itemType") {::hs/type (xs "QName")}}}
+               (xs "union")          {::hs/attrs {(xs "memberTypes") {::hs/type (xs "QNameList")}}}
+               (xs "restriction")    {::hs/attrs {(xs "base") {::hs/type (xs "QName")}}}
+               (xs "QNameList")      {::hs/list-of (xs "QName")}}})

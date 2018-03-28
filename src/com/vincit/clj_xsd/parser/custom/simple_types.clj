@@ -5,7 +5,9 @@
 
 (defn parse-integer [opts value]
   (when (not (empty? value))
-    (Integer/parseInt value)))
+    (try (Integer/parseInt value)
+         (catch NumberFormatException ex
+           nil))))
 
 (defn parse-qname [opts value]
   (let [res    (str/split value #":")

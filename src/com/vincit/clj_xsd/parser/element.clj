@@ -33,7 +33,8 @@
 (defn parse-vanilla [context el-type-def element]
   (let [attrs-def    (::hs/attrs el-type-def)
         content-def  (::hs/content el-type-def)
-        parse-simple (partial simplep/parse-simple context el-type-def (:content element))]
+        content-str  (-> element :content utils/parse-string)
+        parse-simple (partial simplep/parse-simple context el-type-def content-str)]
     (if (or attrs-def content-def)
       (apply merge (filter some? [{}
                                   (cp/do-parse-content context el-type-def element)

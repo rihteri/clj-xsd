@@ -8,8 +8,8 @@
         base-type (get-in type [::xs/restriction ::xs/base])]
     (-> type
         (utils/assoc-if ::hs/list-of item-type)
-        (utils/assoc-if ::hs/restrict base-type)
-        (utils/assoc-if ::hs/union-types
+        (utils/assoc-if ::hs/base base-type)
+        (utils/assoc-if ::hs/union-of
                         (when-let [union-types (get-in type [::xs/union ::xs/member-types])]
                           (apply hash-set union-types)))
         (dissoc ::xs/list ::xs/union ::xs/restriction))))

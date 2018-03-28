@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema
+  xmlns="testlist"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  targetNamespace="testlist">
+  <xs:element name="test" type="strlist" />
+  
+  <xs:simpleType name="strlist">
+    <xs:union memberTypes="xs:integer xs:string" />
+  </xs:simpleType>
+</xs:schema>
