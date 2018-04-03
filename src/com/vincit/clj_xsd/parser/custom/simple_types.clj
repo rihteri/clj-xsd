@@ -17,3 +17,9 @@
                  (get-in opts [::xml/nss (first res)])
                  (get-in opts [::xml/nss :xmlns]))]
     [namesp name]))
+
+(defn parse-double [opts value]
+  (try
+    (Double/parseDouble value)
+    (catch NumberFormatException ex
+      nil)))

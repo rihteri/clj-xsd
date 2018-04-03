@@ -59,9 +59,14 @@
   [kind (->> def
              (sc/transform [::hs/elems sc/MAP-KEYS] (fn [name] [tns name])))])
 
+(defn do-fix-content [tns type]
+  (if (::hs/content type)
+    (sc/transform [::hs/content] (partial fix-content tns) type)
+    type))
+
 (defn fix-one-type [tns type]
   (->> type
-       (sc/transform [::hs/content] (partial fix-content tns))
+       (do-fix-content tns)
        (fix-attrs tns)))
 
 (defn fix-types [tns kind parsed]

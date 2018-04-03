@@ -3,7 +3,6 @@
             [com.vincit.clj-xsd.parser.utils :as utils]
             [com.vincit.clj-xsd.schema :as hs]
             [com.rpl.specter :as sc]
-            [clojure.pprint :as pp]
             [clojure.spec.alpha :as s]
             [com.vincit.clj-xsd.parser.context :as pcont]
             [com.vincit.clj-xsd.parser.simple :as simplep]))

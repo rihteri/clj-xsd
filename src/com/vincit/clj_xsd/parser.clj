@@ -3,6 +3,7 @@
             [com.vincit.clj-xsd.schema :as hs]
             [clojure.string :as str]
             [com.vincit.clj-xsd.metaschema :as xs]
+            [com.vincit.clj-xsd.metaschema.nss :as xss]
             [com.vincit.clj-xsd.parser.utils :as utils]
             [com.vincit.clj-xsd.parser.custom.simple-types :as parsers]
             [com.vincit.clj-xsd.parser.attrs :as attrs]
@@ -14,9 +15,11 @@
             [clojure.data.xml :as xml]))
 
 (def default-simple-parsers
-  {xs/integer parsers/parse-integer
-   xs/string  (fn [_ val] val)
-   xs/qname   parsers/parse-qname})
+  {xs/integer         parsers/parse-integer
+   [xss/sns "double"] parsers/parse-double
+   [xss/sns "float"]  parsers/parse-double
+   xs/string          (fn [_ val] val)
+   xs/qname           parsers/parse-qname})
 
 (defn parse [opts schema element]
   (let [namespaces (hx/extract-namespace-mappings element)

@@ -40,7 +40,7 @@
     (if parser
       (parser context content)
       (when base-type
-        (recur context (get-type-def context base-type) content)))))
+        (parse-simple context (get-type-def context base-type) content)))))
 
 (defn get-custom-or-recursive-parser [context type-name]
   (or (partial (get-parser context type-name) context)

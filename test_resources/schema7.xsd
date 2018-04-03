@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:ex="http://example.org/test-schema-7"
+           xmlns="http://example.org/test-schema-7"
+           targetNamespace="http://example.org/test-schema-7"
+           elementFormDefault="qualified">
+  <xs:element name="top" type="ex:topType" />
+
+  <xs:complexType name="topType">
+    <xs:simpleContent>
+      <xs:extension base="strlist">
+        <xs:attribute name="attrib" type="xs:double" />
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:simpleType name="strlist">
+    <xs:list itemType="xs:string"/>
+  </xs:simpleType>
+</xs:schema>
+

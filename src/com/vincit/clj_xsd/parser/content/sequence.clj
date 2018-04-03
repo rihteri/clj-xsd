@@ -54,7 +54,7 @@
     (if (or (empty? next-els)
             (empty? next-defs))
       accum
-      (recur context accum next-defs))))
+      (parse-elements context accum next-defs))))
 
 (defmethod cp/parse-content ::hs/sequence [context [kind content-def] accum]
   (parse-elements context accum (::hs/vals content-def)))

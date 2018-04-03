@@ -148,11 +148,11 @@ time an element of a specific type is processed.
 
 ## Things that may work
 * producing clojure data structures with namespaced keys
-* some simple types - like xs:integer - will have the correct type in the deserialization result
+* some simple types will have the correct type in the deserialization result
 * multiplicity of elements causes clojure lists
 * sequence and choice type complex types
 * xsi:type schema overrides
-* complex type extensions
+* complex type extensions and simpleContent
 * anonymous types
 * pluggable type handling for simple and complex types
 * type-specific postprocessing functions
@@ -161,7 +161,6 @@ time an element of a specific type is processed.
 * attribute / element name clashes - e.g. use attributename-attr when element of same name in elements
 * sequences within choices
 * more simple type deserializers
-* simpleContent (with attributes)
 * anonymous simple types
 * attribute and element refs
 * attribute and element groups
