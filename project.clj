@@ -1,6 +1,6 @@
-(defproject com.vincit/clj-xsd "0.1.0-SNAPSHOT"
+(defproject com.vincit/clj-xsd "0.1.0"
   :description "Easy XML handling for you favourite language!"
-  :url ""
+  :url "https://github.com/rihteri/clj-xsd"
   :license {:name "Eclipse Public License"
             :url  "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.9.0"]
